@@ -1,0 +1,10 @@
+name = "my_projects"
+version = "0.1.0"
+defaultTargets = ["my_projects"]
+
+[[lean_lib]]
+name = "MyProjects"
+
+[[lean_exe]]
+name = "my_projects"
+root = "Main"

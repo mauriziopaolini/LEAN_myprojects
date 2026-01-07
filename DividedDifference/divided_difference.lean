@@ -7,6 +7,9 @@ where the n-th derivative of f vanishes
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Defs
+import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
+import Mathlib.Analysis.Calculus.Deriv.Support
+import Mathlib.Analysis.Calculus.ContDiff.Basic
 
 open Set Filter Topology
 
@@ -244,83 +247,72 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
 
           tauto
 
-
-#check ContinuousOn.mono
-#check (Ioo a b) ⊆ (Icc a b)
-
 open Set
-
-lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (hab : a < b) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 2) f (Ioo a b)) :
-    ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+open Real
 
 /-
-theorem ContDiffOn.continuousOn_iteratedDerivWithin
-    {n : WithTop ℕ∞} {m : ℕ} (h : ContDiffOn 𝕜 n f s)
-    (hmn : m ≤ n) (hs : UniqueDiffOn 𝕜 s) : ContinuousOn (iteratedDerivWithin m f s) s := by
-  simpa only [iteratedDerivWithin_eq_equiv_comp, LinearIsometryEquiv.comp_continuousOn_iff] using
-    h.continuousOn_iteratedFDerivWithin hmn hs
+theorem deriv_smooth_order {n : ℕ} {f : ℝ → ℝ} {s : Set ℝ}
+    (hf : ContDiffOn ℝ (n + 1) f s) (hs : IsOpen s) :
+    ContDiffOn ℝ n (deriv f) s := by
+  -- The lemma ContDiffOn.deriv handles the reduction of order
+  -- It requires the function to be C^{n+1} to conclude the derivative is C^n
+  exact hf.deriv hs (le_add_self)
 -/
-  sorry
 
-lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (hab : a < b) (s : ℕ) (hf : ContDiffOn ℝ (s + 1 + 1) f (Ioo a b)) :
+lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 1 + 1) f (Ioo a b)) :
+    ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+
+  have hopen : IsOpen (Ioo a b) := by
+    apply isOpen_Ioo
+
+  apply ContDiffOn.deriv_of_isOpen hf hopen
+
+  norm_cast
+
+lemma f_eq_g_on_ab (f : ℝ → ℝ) (g : ℝ → ℝ) (a b : ℝ)
+    (same : ∀ z ∈ (Ioo a b), f z = g z) (hcontf : ContinuousOn f (Ioo a b)) :
+    ContinuousOn g (Ioo a b) := by
+
+  have hopen : IsOpen (Ioo a b) := by
+    apply isOpen_Ioo
+  -- Since $f(z) = g(z)$ for all $z \in (a, b)$, and $f$ is continuous on $(a, b)$, it follows that $g$ is also continuous on $(a, b)$ by the fact that continuity is preserved under equality of functions.
+  have h_cont_g : ContinuousOn (fun z => f z) (Set.Ioo a b) → ContinuousOn (fun z => g z) (Set.Ioo a b) := by
+    -- Since $f(z) = g(z)$ for all $z \in (a, b)$, and $f$ is continuous on $(a, b)$, it follows that $g$ is also continuous on $(a, b)$ by the fact that equality of functions preserves continuity.
+    intros hcontf_eq; exact (by
+    -- Since $f$ and $g$ are equal on $(a, b)$, and $f$ is continuous on $(a, b)$, it follows that $g$ is also continuous on $(a, b)$ by the fact that equality of functions preserves continuity.
+    apply ContinuousOn.congr hcontf_eq; exact fun z hz => same z hz ▸ rfl;);
+  -- Apply the fact that if two functions are equal on an open set and one is continuous, then the other is also continuous.
+  apply h_cont_g hcontf
+
+lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ (s + 1 + 1) f (Ioo a b)) :
     ContinuousOn (deriv f) (Ioo a b) := by
 
-  let fp := deriv f
-  let fp2 := derivWithin f (Ioo a b)
+  --let fp := deriv f
+  --let fp2 := derivWithin f (Ioo a b)
   have ffp1 : ContinuousOn (iteratedDerivWithin 1 f (Ioo a b)) (Ioo a b) := by
     apply ContDiffOn.continuousOn_iteratedDerivWithin hf
     simp
     apply uniqueDiffOn_Ioo
   --have ffp : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
-  have ffp : ContinuousOn (fp2) (Ioo a b) := by
+  have ffp : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
     rw [iteratedDerivWithin_one] at ffp1
     grind
+  have hopen : IsOpen (Ioo a b) := by
+    apply isOpen_Ioo
   --have same_in_ab : ∀ z ∈ (Ioo a b), (deriv f) z = (derivWithin f (Ioo a b)) z := by
-  have same_in_ab : ∀ z ∈ (Ioo a b), fp z = (derivWithin f (Ioo a b)) z := by
+  have same_in_ab : ∀ z ∈ (Ioo a b), (deriv f) z = (derivWithin f (Ioo a b)) z := by
     intro z hz
-    have hopen : IsOpen (Ioo a b) := by
-      apply isOpen_Ioo
     rw [derivWithin_of_isOpen hopen]
     exact hz
-  have hcontat : ∀ z ∈ (Ioo a b), ContinuousAt fp z := by
+  have same_in_ab' : ∀ z ∈ (Ioo a b), (derivWithin f (Ioo a b)) z = (deriv f) z := by
     intro z hz
-    specialize same_in_ab z hz
+    rw [derivWithin_of_isOpen hopen]
+    exact hz
+  apply f_eq_g_on_ab (derivWithin f (Ioo a b)) (deriv f)
+  --exact hab
+  exact same_in_ab'
+  exact ffp
 
-/- immagino di dover usare il teorema seguente:
-theorem ContinuousWithinAt.continuousAt
-    (h : ContinuousWithinAt f s x) (hs : s ∈ 𝓝 x) : ContinuousAt f x :=
-  (continuousWithinAt_iff_continuousAt hs).mp h
--/
-    sorry
-
-  have hcontwat : ∀ z ∈ (Ioo a b), ContinuousWithinAt (deriv f) (Ioo a b) z := by
-    intro z hz
-    apply ContinuousAt.continuousWithinAt
-    grind
-
-  tauto
-
-/- snippet from divided difference
-
-        have ffp : ContDiffOn ℝ (mm + 1) fp (Ioo a b) := by
-          intro y hy
-          have hfy : ContDiffWithinAt ℝ (mm + 1 + 1) f (Ioo a b) y := by
-            specialize hf y hy
-            exact hf
-          have hfy_succ : ContDiffWithinAt ℝ (mm + 1) fp (Ioo a b) y := by
-          -- rw [← ContDiffOn_succ_iff_deriv]
-          -- apply ContDiff.deriv at hf
-            sorry
-          exact hfy_succ
--/
-
--- variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
--- variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
-theorem continuous_derivative_of_c1 {f : ℝ → ℝ} {s : Set ℝ} (hs : IsOpen s) (hf : ContDiffOn ℝ 1 f s) :
-    ContinuousOn (fderiv ℝ f) s := by
-  -- ContDiffOn.continuousOn_fderiv provides the proof directly for C^n functions where n ≥ 1
-  -- exact hf.continuousOn_fderiv hs le_rfl
-  sorry
 
 lemma cont_on_subset_unused (f : ℝ → ℝ) (a b c d: ℝ) (hab : a < b) (hac : a < c) (hcd : c < d)
   (hdb : d < b) (hf : ContDiffOn ℝ 1 f (Ioo a b)) : ContinuousOn (deriv f) (Icc c d) := by
@@ -376,8 +368,6 @@ lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
       case zero =>
         let ⟨y, hy_prop⟩ := multiRolle hn_ne_0 hab hx0 hxn h_ordered_nodes hfc zerof
-        -- rw [hm] at h
-        -- rw [zero_add] at h
         rw [hm] at hxn
         rw [hm] at hy_prop
         rw [zero_add] at hy_prop
@@ -417,32 +407,15 @@ lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
         let fp_ab := derivWithin f (Ioo a b)
         simp at ih
         rw [iteratedDeriv_succ']
-/-
-theorem ContDiffOn.continuousOn_iteratedDerivWithin
-    {n : WithTop ℕ∞} {m : ℕ} (h : ContDiffOn 𝕜 n f s)
-    (hmn : m ≤ n) (hs : UniqueDiffOn 𝕜 s) : ContinuousOn (iteratedDerivWithin m f s) s := by
-  simpa only [iteratedDerivWithin_eq_equiv_comp, LinearIsometryEquiv.comp_continuousOn_iff] using
-    h.continuousOn_iteratedFDerivWithin hmn hs
--/
-        have ffp0 : ContinuousOn (deriv f) (Ioo a b) := by
-          apply regularderiv0 f a b hab mm
-          -- XXX perche' non va? problemi con un "cast"?
-/-
-theorem derivWithin_of_isOpen (hs : IsOpen s) (hx : x ∈ s) : derivWithin f s x = deriv f x :=
-  derivWithin_of_mem_nhds (hs.mem_nhds hx)
--/
-          sorry
 
-        have ffp : ContDiffOn ℝ (mm + 1) fp (Ioo a b) := by
-          intro y hy
-          have hfy : ContDiffWithinAt ℝ (mm + 1 + 1) f (Ioo a b) y := by
-            specialize hf y hy
-            exact hf
-          have hfy_succ : ContDiffWithinAt ℝ (mm + 1) fp (Ioo a b) y := by
-          -- rw [← ContDiffOn_succ_iff_deriv]
-          -- apply ContDiff.deriv at hf
-            sorry
-          exact hfy_succ
+        have ffp0 : ContinuousOn (deriv f) (Ioo a b) := by
+          apply regularderiv0 f a b mm
+          norm_cast
+
+        have ffp : ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+          apply regularderiv f a b mm
+          norm_cast
+
         have hy0 : y 0 ≤ y 0 := by
           simp
         have y0ltymm1 : y 0 < y (mm + 1) := by

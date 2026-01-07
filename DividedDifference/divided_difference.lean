@@ -314,36 +314,6 @@ lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ
   exact ffp
 
 
-lemma cont_on_subset_unused (f : ℝ → ℝ) (a b c d: ℝ) (hab : a < b) (hac : a < c) (hcd : c < d)
-  (hdb : d < b) (hf : ContDiffOn ℝ 1 f (Ioo a b)) : ContinuousOn (deriv f) (Icc c d) := by
-
-    have sbset : (Icc c d) ⊆ (Ioo a b) := by
-      intro x hx
-      have h1 : a < x := lt_of_lt_of_le hac hx.1
-      have h2 : x < b := lt_of_le_of_lt hx.2 hdb
-      exact ⟨h1, h2⟩
-
-    have hfp : ContDiffOn ℝ 0 (deriv f) (Ioo a b) := by
-      intro y hy
-      -- from `ContDiffOn ℝ 1 f (Ioo a b)` we get `ContDiffWithinAt ℝ 1 f (Ioo a b) y`
-      have hfy : ContDiffWithinAt ℝ 1 f (Ioo a b) y := hf y hy
-      -- the successor characterization gives continuity of the derivative (order 0)
-      -- have hder := contDiffWithinAt_succ_iff_hasFDerivWithinAt hfy
-      -- have hder := (ContDiffWithinAt.succ_iff.1 hfy).2
-      -- exact hder
-
-    -- `ContDiffOn ... 0` gives continuity, then restrict to the closed interval
-    -- have hcont : ContinuousOn (deriv f) (Ioo a b) := ContDiffOn.continuousOn_zero hfp
-    -- exact ContinuousOn.mono hcont sbset
-    -- have hfp : ContDiffOn ℝ 0 (deriv f) (Ioo a b) :=
-
-      sorry
-
-    apply ContDiffOn.continuousOn_zero at hfp
-    -- apply continuousOn_iff_continuous_restrict
-
-    sorry
-
 lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   (hx0 : a ≤ x 0) (hxn : x n ≤ b)
   (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
@@ -431,10 +401,28 @@ lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
               grind
             specialize hmmm mmm
             grind
+
+        have hay0 : a < y 0 := by
+          grind
+        have hymmp1b : y (mm + 1) < b := by
+          grind
+        have hay0' : a ≤ y 0 := by
+          grind
+        have hymmp1b' : y (mm + 1) ≤ b := by
+          grind
+
+        have yy_in_ab : (Icc (y 0) (y (mm+1))) ⊆ (Ioo a b) := by
+          apply Icc_subset_Ioo hay0 hymmp1b
+
+        have yy_in_ab_oo : (Ioo (y 0) (y (mm+1))) ⊆ (Ioo a b) := by
+          apply Ioo_subset_Ioo hay0' hymmp1b'
+
         have hfpc : ContinuousOn fp (Icc (y 0) (y (mm+1))) := by
-          sorry
+          apply ContinuousOn.mono ffp0 yy_in_ab
+
         have ffp' : ContDiffOn ℝ (mm+1) fp (Ioo (y 0) (y (mm+1))) := by
-          sorry
+          apply ContDiffOn.mono ffp yy_in_ab_oo
+
         have zerofp : ∀ k ≤ mm + 1, fp (y k) = 0 := by
           grind
         have h_ordered_nodesy : ∀ k < mm+1, y k < y (k + 1) := by

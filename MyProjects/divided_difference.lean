@@ -1,9 +1,9 @@
 /-
-This is a comment
+This project proves an extended version of Rolle's theorem, namely if we have n+1 ordered nodes in
+interval [a,b] where the C^n function f vanishes, then there exists a point c within the nodes
+where the n-th derivative of f vanishes
 -/
 
--- import Mathlib.Analysis.Calculus.LocalExtr.Basic
--- import Mathlib.Topology.Order.Rolle
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Defs
@@ -33,17 +33,6 @@ lemma push_vec_v0 (x : ℕ → ℝ) (y : ℕ → ℝ) (a : ℝ) (h : y = push_ve
     rw [h]
     rfl
 
-/-
-If x_k < x_{k+1} for all k < n, then x is strictly monotone on {0, ..., n}.
--/
-lemma strictMonoOn_of_ordered_nodes_obsoleted (h_ordered_nodes: ∀ k < n, x k < x (k+1)) :
-  StrictMonoOn x (Set.Iic n) := by
-
-    -- refine StrictMono.strictMonoOn ?_ (Iic n)
-
-    sorry
-
--- lemma strictMono_leq_n (h_ordered_nodes: ∀ k ≤ n, x k < x (k+1)) : ∀ q < n, ∀ p < q, x p < x q := by
 lemma strictMono_leq_n (n : ℕ) (x : ℕ → ℝ) (h_ordered_nodes: ∀ k < n, x k < x (k+1)) (hq : q ≤ n) (hp : p < q) :
   x p < x q := by
 
@@ -132,7 +121,6 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           rw [zerof 0 (by linarith)]
           rw [zerof 1 (by linarith)]
 
-        -- have h_increasing : StrictMonoOn x (Set.Iic (m+1)) :=
         have hfcx0x1 : ContinuousOn f (Icc (x 0) (x 1)) := by
           apply ContinuousOn.mono hfc
           apply Icc_subset_Icc
@@ -144,7 +132,6 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
             rw [hm]
             simp
 
-          -- have hx1leb : x 1 ≤ b := by
           rw [hm] at h_ordered_nodes
           clear ih
           grind
@@ -257,13 +244,14 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
 
           tauto
 
+
 #check ContinuousOn.mono
 #check (Ioo a b) ⊆ (Icc a b)
 
 open Set
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+-- variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+-- variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 theorem continuous_derivative_of_c1 {f : ℝ → ℝ} {s : Set ℝ} (hs : IsOpen s) (hf : ContDiffOn ℝ 1 f s) :
     ContinuousOn (fderiv ℝ f) s := by
   -- ContDiffOn.continuousOn_fderiv provides the proof directly for C^n functions where n ≥ 1
@@ -359,10 +347,37 @@ lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
         rw [hm] at zerof
         rw [hm] at hf
         rw [hm] at hy_prop
+        rw [hm] at hn_ne_0
         clear hm
         let fp := deriv f
+        let fp_ab := derivWithin f (Ioo a b)
         simp at ih
         rw [iteratedDeriv_succ']
+/-
+theorem ContDiffOn.continuousOn_iteratedDerivWithin
+    {n : WithTop ℕ∞} {m : ℕ} (h : ContDiffOn 𝕜 n f s)
+    (hmn : m ≤ n) (hs : UniqueDiffOn 𝕜 s) : ContinuousOn (iteratedDerivWithin m f s) s := by
+  simpa only [iteratedDerivWithin_eq_equiv_comp, LinearIsometryEquiv.comp_continuousOn_iff] using
+    h.continuousOn_iteratedFDerivWithin hmn hs
+-/
+        have ffp' : ContinuousOn (iteratedDerivWithin 1 f (Ioo a b)) (Ioo a b) := by
+          apply ContDiffOn.continuousOn_iteratedDerivWithin hf
+          simp
+          apply uniqueDiffOn_Ioo
+
+        have ffp'' : ContinuousOn (deriv f) (Ioo a b) := by
+          have ffp3 : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
+            rw [iteratedDerivWithin_one] at ffp'
+            grind
+
+          have same_in_ab : ∀ z ∈ (Ioo a b), fp z = fp_ab z := by
+            sorry -- should use theorem below!
+/-
+theorem derivWithin_of_isOpen (hs : IsOpen s) (hx : x ∈ s) : derivWithin f s x = deriv f x :=
+  derivWithin_of_mem_nhds (hs.mem_nhds hx)
+-/
+          sorry
+
         have ffp : ContDiffOn ℝ (mm + 1) fp (Ioo a b) := by
           intro y hy
           have hfy : ContDiffWithinAt ℝ (mm + 1 + 1) f (Ioo a b) y := by

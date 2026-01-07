@@ -250,6 +250,57 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
 
 open Set
 
+lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (hab : a < b) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 2) f (Ioo a b)) :
+    ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+
+/-
+theorem ContDiffOn.continuousOn_iteratedDerivWithin
+    {n : WithTop ℕ∞} {m : ℕ} (h : ContDiffOn 𝕜 n f s)
+    (hmn : m ≤ n) (hs : UniqueDiffOn 𝕜 s) : ContinuousOn (iteratedDerivWithin m f s) s := by
+  simpa only [iteratedDerivWithin_eq_equiv_comp, LinearIsometryEquiv.comp_continuousOn_iff] using
+    h.continuousOn_iteratedFDerivWithin hmn hs
+-/
+  sorry
+
+lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (hab : a < b) (s : ℕ) (hf : ContDiffOn ℝ (s + 1 + 1) f (Ioo a b)) :
+    ContinuousOn (deriv f) (Ioo a b) := by
+
+  have ffp' : ContinuousOn (iteratedDerivWithin 1 f (Ioo a b)) (Ioo a b) := by
+
+    apply ContDiffOn.continuousOn_iteratedDerivWithin hf
+    simp
+    apply uniqueDiffOn_Ioo
+
+  have ffp3 : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
+    rw [iteratedDerivWithin_one] at ffp'
+    grind
+  have same_in_ab : ∀ z ∈ (Ioo a b), (deriv f) z = (derivWithin f (Ioo a b)) z := by
+    have hopen : IsOpen (Ioo a b) := by
+      sorry
+
+    -- apply derivWithin_of_isOpen ???
+    sorry -- should use theorem below!
+/-
+theorem derivWithin_of_isOpen (hs : IsOpen s) (hx : x ∈ s) : derivWithin f s x = deriv f x :=
+  derivWithin_of_mem_nhds (hs.mem_nhds hx)
+-/
+
+  sorry
+
+/- snippet from divided difference
+
+        have ffp : ContDiffOn ℝ (mm + 1) fp (Ioo a b) := by
+          intro y hy
+          have hfy : ContDiffWithinAt ℝ (mm + 1 + 1) f (Ioo a b) y := by
+            specialize hf y hy
+            exact hf
+          have hfy_succ : ContDiffWithinAt ℝ (mm + 1) fp (Ioo a b) y := by
+          -- rw [← ContDiffOn_succ_iff_deriv]
+          -- apply ContDiff.deriv at hf
+            sorry
+          exact hfy_succ
+-/
+
 -- variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 -- variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 theorem continuous_derivative_of_c1 {f : ℝ → ℝ} {s : Set ℝ} (hs : IsOpen s) (hf : ContDiffOn ℝ 1 f s) :
@@ -360,18 +411,9 @@ theorem ContDiffOn.continuousOn_iteratedDerivWithin
   simpa only [iteratedDerivWithin_eq_equiv_comp, LinearIsometryEquiv.comp_continuousOn_iff] using
     h.continuousOn_iteratedFDerivWithin hmn hs
 -/
-        have ffp' : ContinuousOn (iteratedDerivWithin 1 f (Ioo a b)) (Ioo a b) := by
-          apply ContDiffOn.continuousOn_iteratedDerivWithin hf
-          simp
-          apply uniqueDiffOn_Ioo
-
-        have ffp'' : ContinuousOn (deriv f) (Ioo a b) := by
-          have ffp3 : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
-            rw [iteratedDerivWithin_one] at ffp'
-            grind
-
-          have same_in_ab : ∀ z ∈ (Ioo a b), fp z = fp_ab z := by
-            sorry -- should use theorem below!
+        have ffp0 : ContinuousOn (deriv f) (Ioo a b) := by
+          apply regularderiv0 f a b hab mm
+          -- XXX perche' non va? problemi con un "cast"?
 /-
 theorem derivWithin_of_isOpen (hs : IsOpen s) (hx : x ∈ s) : derivWithin f s x = deriv f x :=
   derivWithin_of_mem_nhds (hs.mem_nhds hx)

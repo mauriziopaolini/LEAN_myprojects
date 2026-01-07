@@ -1,15 +1,15 @@
-name = "my_projects"
+name = "DividedDifference"
 version = "0.1.0"
-defaultTargets = ["my_projects"]
+defaultTargets = ["divideddifference"]
 
 [[lean_lib]]
-name = "MyProjects"
+name = "DividedDifference"
 
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
-rev = "v4.26.0-rc2"
+rev = "v4.26.0"
 
 [[lean_exe]]
-name = "my_projects"
+name = "divideddifference"
 root = "Main"

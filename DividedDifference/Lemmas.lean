@@ -29,10 +29,37 @@ lemma strictMono_leq_n (n : ℕ) (x : ℕ → ℝ) (h_ordered_nodes: ∀ k < n, 
         linarith
       rw [hpzero]
       simp
-      specialize h_ordered_nodes
-      grind
+      have n_gt_0 : 0 < n := by
+        simp at hq
+        linarith
+      specialize h_ordered_nodes 0 n_gt_0
+      simp at h_ordered_nodes
+      exact h_ordered_nodes
     case succ qqq hqqq =>
-      grind
+      rw [hhqq] at hp
+      by_cases hhhh : p < qqq + 1
+      rw [hhqq] at hq
+      have hp' : qqq + 1 ≤ n := by
+        linarith
+      have qqq' : qqq = qqq := by
+        tauto
+      have hq' : qqq + 1 < n := by
+        linarith
+      specialize h_ordered_nodes (qqq+1) hq'
+      specialize hqqq qqq hhhh hp' qqq'
+      linarith
+
+      have hhhh' : qqq ≤ p := by
+        linarith
+
+      have hp' : p = qqq + 1 := by
+        linarith
+      rw [← hp']
+      rw [hhqq] at hq
+      have pltn : p < n := by
+        linarith
+      specialize h_ordered_nodes p pltn
+      exact h_ordered_nodes
 
 lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
   (hx0 : a ≤ x 0) (hxn : x n ≤ b)

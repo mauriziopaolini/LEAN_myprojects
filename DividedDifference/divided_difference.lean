@@ -18,7 +18,7 @@ theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   (hx0 : a ≤ x 0) (hxn : x n ≤ b)
   (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
   (hfc : ContinuousOn f (Icc a b))
-  (hf : ContDiffOn ℝ n f (Ioo a b))
+  (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
   (zerof : ∀ k ≤ n, f (x k) = 0)
   : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
@@ -82,7 +82,7 @@ theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
           apply regularderiv0 f a b mm
           norm_cast
 
-        have ffp : ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+        have ffp : ContDiffOn ℝ (mm) (deriv f) (Ioo a b) := by
           apply regularderiv f a b mm
           norm_cast
 
@@ -120,7 +120,7 @@ theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
         have hfpc : ContinuousOn fp (Icc (y 0) (y (mm+1))) := by
           apply ContinuousOn.mono ffp0 yy_in_ab
 
-        have ffp' : ContDiffOn ℝ (mm+1) fp (Ioo (y 0) (y (mm+1))) := by
+        have ffp' : ContDiffOn ℝ (mm) fp (Ioo (y 0) (y (mm+1))) := by
           apply ContDiffOn.mono ffp yy_in_ab_oo
 
         have zerofp : ∀ k ≤ mm + 1, fp (y k) = 0 := by

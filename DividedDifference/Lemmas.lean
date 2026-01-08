@@ -222,8 +222,8 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           tauto
 
 
-lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 1 + 1) f (Ioo a b)) :
-    ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by
+lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 1) f (Ioo a b)) :
+    ContDiffOn ℝ (mm) (deriv f) (Ioo a b) := by
 
   have hopen : IsOpen (Ioo a b) := by
     apply isOpen_Ioo
@@ -247,7 +247,7 @@ lemma f_eq_g_on_ab (f : ℝ → ℝ) (g : ℝ → ℝ) (a b : ℝ)
   -- Apply the fact that if two functions are equal on an open set and one is continuous, then the other is also continuous.
   apply h_cont_g hcontf
 
-lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ (s + 1 + 1) f (Ioo a b)) :
+lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ (s + 1) f (Ioo a b)) :
     ContinuousOn (deriv f) (Ioo a b) := by
 
   --let fp := deriv f
@@ -275,4 +275,3 @@ lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ
   --exact hab
   exact same_in_ab'
   exact ffp
-

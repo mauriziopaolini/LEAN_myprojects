@@ -19,7 +19,7 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hx0 : a ≤ x 0) (hxn : x n ≤ b)
     (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
     (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ n f (Ioo a b))
+    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ k ≤ n, f (x k) = 0)
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 

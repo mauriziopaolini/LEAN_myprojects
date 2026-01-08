@@ -308,7 +308,7 @@ lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ
   exact ffp
 -/
 
-lemma extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   (hx0 : a ≤ x 0) (hxn : x n ≤ b)
   (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
   (hfc : ContinuousOn f (Icc a b))

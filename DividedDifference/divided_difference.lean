@@ -6,12 +6,9 @@ where the n-th derivative of f vanishes
 
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-import Mathlib.Analysis.Calculus.ContDiff.Defs
-import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
-import Mathlib.Analysis.Calculus.Deriv.Support
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-open Set Filter Topology
+open Set
 
 variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ}
 
@@ -247,17 +244,6 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
 
           tauto
 
-open Set
-open Real
-
-/-
-theorem deriv_smooth_order {n : ℕ} {f : ℝ → ℝ} {s : Set ℝ}
-    (hf : ContDiffOn ℝ (n + 1) f s) (hs : IsOpen s) :
-    ContDiffOn ℝ n (deriv f) s := by
-  -- The lemma ContDiffOn.deriv handles the reduction of order
-  -- It requires the function to be C^{n+1} to conclude the derivative is C^n
-  exact hf.deriv hs (le_add_self)
--/
 
 lemma regularderiv (f : ℝ → ℝ) (a b : ℝ) (mm : ℕ) (hf : ContDiffOn ℝ (mm + 1 + 1) f (Ioo a b)) :
     ContDiffOn ℝ (mm + 1) (deriv f) (Ioo a b) := by

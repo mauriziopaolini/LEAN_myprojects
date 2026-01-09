@@ -39,9 +39,17 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   have zerof' : ∀ k ≤ n, f (x' k) = 0 := by
     exact hx'.2.2.2
 
--- FIX!!!
-  have hc : ∃ c ∈ Ioo (x' 0) (x' n) : iteratedDeriv n f c = 0 := by
+  have hc : ∃ cc ∈ Ioo (x' 0) (x' n), iteratedDeriv n f cc = 0 := by
     apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof'
+
+  obtain ⟨c, hc'⟩ := hc
+  have hcinx0xn : c ∈ Ioo (x' 0) (x' n) := by
+    exact hc'.1
+  use c
+  constructor
+  apply Ioo_subset_Ioo hx0 hxn
+  exact hcinx0xn
+  exact hc'.2
 
 /-
   example of using the theorem
@@ -49,6 +57,8 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
 noncomputable def mynodes : Finset ℝ := {0, 2, 1}
 
+#check Finset.min' mynodes
+#check mynodes.min
 theorem main0 (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hx0 : a ≤ x 0) (hxn : x n ≤ b)
     (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))

@@ -18,13 +18,11 @@ lemma strictMono_leq_n (n : ℕ) (x : ℕ → ℝ) (h_ordered_nodes: ∀ k < n, 
     rw [hhq] at hp
     tauto
   case succ qq =>
-    rw [hhq] at hq
-    rw [hhq] at hp
+    rw [hhq] at hq hp
     clear hhq
     induction hhqq:qq generalizing qq
     case zero =>
-      rw [hhqq] at hp
-      rw [hhqq] at hq
+      rw [hhqq] at hp hq
       have hpzero : p = 0 := by
         linarith
       rw [hpzero]
@@ -73,10 +71,7 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
       exfalso
       tauto
     case succ m =>
-      rw [h] at hn_ne_0
-      rw [h] at hxn
-      rw [h] at h_ordered_nodes
-      rw [h] at zerof
+      rw [h] at hn_ne_0 hxn h_ordered_nodes zerof
 
       clear h
       induction hm:m generalizing m x a
@@ -89,9 +84,9 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           rw [zerof 1 (by linarith)]
         have hfcx0x1 : ContinuousOn f (Icc (x 0) (x 1)) := by
           apply ContinuousOn.mono hfc
-          apply Icc_subset_Icc
-          exact hx0
-          exact hxn
+          apply Icc_subset_Icc hx0 hxn
+          --exact hx0
+          --exact hxn
 
         let ⟨c, cmem, hc⟩ := exists_deriv_eq_zero hx0x1 hfcx0x1 hfI
 
@@ -115,51 +110,58 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           simp
 
         case zero =>
-          simp
-          use hc
+          simp; use hc
 
       case succ mm ih =>
         have hx0x1 : x 0 < x 1 := by
-          grind
+          specialize h_ordered_nodes 0
+          rw [zero_add] at h_ordered_nodes
+          have h : 0 < m + 1 := by simp
+          specialize h_ordered_nodes h
+          exact h_ordered_nodes
         have hfI : f (x 0) = f (x 1) := by
           rw [zerof 0 (by linarith)]
           rw [zerof 1 (by linarith)]
 
         have hfcx0x1 : ContinuousOn f (Icc (x 0) (x 1)) := by
           apply ContinuousOn.mono hfc
-          apply Icc_subset_Icc
-          exact hx0
+          apply Icc_subset_Icc hx0
           have hx1ltxmp1 : x 1 < x (m+1) := by
             apply strictMono_leq_n (m + 1) x h_ordered_nodes
             simp
             simp
-            rw [hm]
-            simp
+            rw [hm]; simp
 
           rw [hm] at h_ordered_nodes
           clear ih
-          grind
+          linarith
 
         let ⟨c, cmem, hc⟩ := exists_deriv_eq_zero hx0x1 hfcx0x1 hfI
 
         let x_cdr := pop_vec x
 
-        rw [hm] at h_ordered_nodes
-        rw [hm] at zerof
+        rw [hm] at h_ordered_nodes zerof
 
+        unfold Ioo at cmem
+        have hcinx0x1: x 0 < c ∧ c < x 1 := by
+          exact cmem
         have hcltb : c < b := by
+          clear ih
           have cltx1 : c < x 1 := by
-            grind
+            --have h: x 0 < c ∧ c < x 1 := by
+            --  exact cmem
+            exact hcinx0x1.2
 
           have x1ltxmmp2 : x 1 < x (mm+2) := by
             apply strictMono_leq_n (mm + 2) x h_ordered_nodes
             simp
-            grind
+            simp
 
           have xmmp2leb : x (mm+2) ≤ b := by
-            grind
+            rw [hm] at hxn; rw [add_assoc] at hxn
+            simp at hxn; exact hxn
 
-          grind
+          linarith
 
         have halexcdr0 : c ≤ x_cdr 0 := by
           have x_cdr0eqx1 : x_cdr 0 = x 1 := by
@@ -167,15 +169,23 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
             apply pop_vec_v 0 x x_cdr
             tauto
 
-          grind
+          clear ih
+          rw [x_cdr0eqx1]
+          have h : c < x 1 := by
+            exact hcinx0x1.2
+          linarith
 
         have hfccb : ContinuousOn f (Icc c b) := by
+          clear ih
           apply ContinuousOn.mono hfc
           apply Icc_subset_Icc
-          grind
-          simp
+          have hx0ltc : x 0 < c := by
+            apply hcinx0x1.1
+          linarith
+          linarith
 
         have zerosf' : ∀ k ≤ mm + 1, f (x_cdr k) = 0 := by
+          clear ih
           intro k hk
           have x_cdrkeqxkp1 : x_cdr k = x (k+1) := by
 
@@ -183,9 +193,12 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
             tauto
 
           rw [x_cdrkeqxkp1]
-          grind
+          specialize zerof (k + 1)
+          apply zerof
+          linarith
 
         have h_ordered_nodes' : ∀ k < mm + 1, x_cdr k < x_cdr (k + 1) := by
+          clear ih
           intro k
           have ht1 : x_cdr k = x (k+1) := by
             apply pop_vec_v k x x_cdr
@@ -193,16 +206,27 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           have ht2 : x_cdr (k+1) = x (k+2) := by
             apply pop_vec_v (k+1) x x_cdr
             tauto
-          rw [ht1]
-          rw [ht2]
-          grind
+          rw [ht1]; rw [ht2]
+          specialize h_ordered_nodes (k+1)
+          intro hkltmmp1
+          have hkp1ltmmp1p1 : k + 1 < mm + 1 + 1 := by
+            linarith
+          specialize h_ordered_nodes hkp1ltmmp1p1
+          rw [add_assoc] at h_ordered_nodes
+          simp at h_ordered_nodes
+          exact h_ordered_nodes
 
         have h_xcdrmmp1lexmmp2 : x_cdr (mm + 1) = x (mm + 2) := by
           apply pop_vec_v (mm + 1) x x_cdr
           tauto
 
         have h_xcdrmmp1leb : x_cdr (mm + 1) ≤ b := by
-          grind
+          clear ih
+          rw [h_xcdrmmp1lexmmp2]
+          rw [hm] at hxn
+          rw [add_assoc] at hxn
+          simp at hxn
+          exact hxn
 
         have hn_ne_0' : mm + 1 ≠ 0 := by
           simp
@@ -230,7 +254,9 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           exact hc
 
           rw [hfirst]
-          grind
+          simp
+
+          exact cmem
 
         case succ kk =>
           have hrest : y (kk + 1) = y_tail kk := by
@@ -241,10 +267,11 @@ lemma multiRolle (hn_ne_0 : n ≠ 0) (hab : a < b)
           specialize hy_tail kk
           rw [hk'] at hk
           have hk'' : kk < mm + 1 := by
-            grind
+            linarith
 
           constructor
-          grind
+          specialize hy_tail hk''
+          exact hy_tail.1
 
           tauto
 
@@ -277,19 +304,15 @@ lemma f_eq_g_on_ab (f : ℝ → ℝ) (g : ℝ → ℝ) (a b : ℝ)
 lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ (s + 1) f (Ioo a b)) :
     ContinuousOn (deriv f) (Ioo a b) := by
 
-  --let fp := deriv f
-  --let fp2 := derivWithin f (Ioo a b)
   have ffp1 : ContinuousOn (iteratedDerivWithin 1 f (Ioo a b)) (Ioo a b) := by
     apply ContDiffOn.continuousOn_iteratedDerivWithin hf
     simp
     apply uniqueDiffOn_Ioo
-  --have ffp : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
   have ffp : ContinuousOn (derivWithin f (Ioo a b)) (Ioo a b) := by
     rw [iteratedDerivWithin_one] at ffp1
-    grind
+    exact ffp1
   have hopen : IsOpen (Ioo a b) := by
     apply isOpen_Ioo
-  --have same_in_ab : ∀ z ∈ (Ioo a b), (deriv f) z = (derivWithin f (Ioo a b)) z := by
   have same_in_ab : ∀ z ∈ (Ioo a b), (deriv f) z = (derivWithin f (Ioo a b)) z := by
     intro z hz
     rw [derivWithin_of_isOpen hopen]
@@ -298,7 +321,7 @@ lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ
     intro z hz
     rw [derivWithin_of_isOpen hopen]
     exact hz
+
   apply f_eq_g_on_ab (derivWithin f (Ioo a b)) (deriv f)
-  --exact hab
   exact same_in_ab'
   exact ffp

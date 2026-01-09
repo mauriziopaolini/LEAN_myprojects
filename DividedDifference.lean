@@ -8,7 +8,7 @@ import DividedDifference.divided_difference
 
 open Set
 
-variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ} {xx : Finset ℝ}
+variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ} {nodes : Finset ℝ}
 
 /-
 main0 is exactly the theorem extRolle in divided_difference.lean
@@ -18,11 +18,11 @@ ideally one should e.g. allow for the nodes to be in any order
 /- try to use Finset(s) for the "main" theorem (work in progress)-/
 
 theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
-    (hcard : card xx = n + 1)
-    (h_nodes_in_ab : ∀ x ∈ xx, x ∈ (Icc a b))
+    (hcard : Finset.card nodes = n + 1)
+    (h_nodes_in_ab : ∀ x ∈ nodes, x ∈ (Icc a b))
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
-    (zerof : ∀ k ≤ n, f (x k) = 0)
+    (zerof : ∀ x ∈ nodes, f (x) = 0)
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
   have h_ordered_nodes_extra : ∃ x' : ℕ → ℝ, a ≤ x' 0 ∧ x' n ≤ b ∧

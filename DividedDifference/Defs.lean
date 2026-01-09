@@ -30,3 +30,12 @@ lemma push_vec_v0 (x : ℕ → ℝ) (y : ℕ → ℝ) (a : ℝ) (h : y = push_ve
   y 0 = a := by
     rw [h]
     rfl
+
+open Set
+
+def intOfHull (nodes : Finset ℝ) : Set ℝ :=
+  if nonempty : nodes.Nonempty then
+    -- nodes is nonempty
+    Ioo (Finset.min' nodes nonempty) (Finset.max' nodes nonempty)
+  else
+    ∅

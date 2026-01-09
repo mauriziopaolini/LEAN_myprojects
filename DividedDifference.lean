@@ -23,7 +23,7 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ nodes, f (x) = 0)
-    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
 
   have h_ordered_nodes_extra : ∃ x' : ℕ → ℝ, a ≤ x' 0 ∧ x' n ≤ b ∧
       (∀ k < n, (x' k) < x' (k+1)) ∧

@@ -20,7 +20,7 @@ theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   (hfc : ContinuousOn f (Icc a b))
   (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
   (zerof : ∀ k ≤ n, f (x k) = 0)
-  : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+  : ∃ c ∈ Ioo (x 0) (x n), iteratedDeriv n f c = 0 := by
 
     cases h:n
     case zero =>
@@ -58,9 +58,9 @@ theorem extRolle (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
         have hy0_lb : y 0 < b := by
           apply lt_of_lt_of_le at hy0_ltx1
           exact hy0_ltx1 hxn
-        have hy0_memab : y 0 ∈ Ioo a b := by
-          exact ⟨hy0_ga, hy0_lb⟩
-        use hy0_memab
+        have hy0_memx0xn : y 0 ∈ Ioo (x 0) (x 1) := by
+          exact ⟨hy0_gtx0, hy0_ltx1⟩
+        use hy0_memx0xn
         exact hy0_prop.left
 
       case succ mm ih =>

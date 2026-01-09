@@ -39,7 +39,9 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   have zerof' : ∀ k ≤ n, f (x' k) = 0 := by
     exact hx'.2.2.2
 
-  apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof'
+-- FIX!!!
+  have hc : ∃ c ∈ Ioo (x' 0) (x' n) : iteratedDeriv n f c = 0 := by
+    apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof'
 
 /-
   example of using the theorem
@@ -53,6 +55,6 @@ theorem main0 (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ k ≤ n, f (x k) = 0)
-    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ Ioo (x 0) (x n), iteratedDeriv n f c = 0 := by
 
   apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof

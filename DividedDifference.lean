@@ -15,6 +15,7 @@ main0 is exactly the theorem extRolle in divided_difference.lean
 ideally one should e.g. allow for the nodes to be in any order
 -/
 
+
 /- try to use Finset(s) for the "main" theorem (work in progress)-/
 
 theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
@@ -26,8 +27,18 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
 
   have h_ordered_nodes_extra : ∃ x' : ℕ → ℝ, a ≤ x' 0 ∧ x' n ≤ b ∧
-      (∀ k < n, (x' k) < x' (k+1)) ∧
+      (∀ i ≤ n, ∀ j < i, (x' j) < x' i) ∧
       (∀ k ≤ n, f (x' k) = 0) := by
+
+    constructor
+    constructor
+    apply get_ordered_n_nodes_v1 nodes (n+1) 0
+    use get_ordered_n_nodes nodes (n+1)
+    apply get_ordered_n_nodes_v0 nodes (n+1)
+    unfold get_ordered_n_nodes
+
+    obtain ⟨x',hx'⟩ := get_ordered_n_nodes nodes (n+1)
+
     sorry
 
   obtain ⟨x', hx'⟩ := h_ordered_nodes_extra
@@ -57,8 +68,11 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
 noncomputable def mynodes : Finset ℝ := {0, 2, 1}
 
+noncomputable def mynodesvec : ℕ → ℝ := get_ordered_n_nodes mynodes 3
+
 #check Finset.min' mynodes
-#check mynodes.min
+#check mynodesvec
+
 theorem main0 (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hx0 : a ≤ x 0) (hxn : x n ≤ b)
     (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))

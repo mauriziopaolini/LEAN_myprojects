@@ -57,6 +57,9 @@ noncomputable def get_ordered_n_nodes (nodes : Finset ℝ) (n : ℕ) : ℕ → �
   else
     fun k => 0*k
 
+/- for now just comment this out -/
+
+/-
 lemma get_ordered_n_nodes_v0 (nodes : Finset ℝ) (n : ℕ) (x' : ℕ → ℝ)
     (h: x' = get_ordered_n_nodes nodes n) (n_eq_card : n = Finset.card nodes):
     ∀ i < n, ∀ j < i, x' j < x' i := by
@@ -83,3 +86,4 @@ lemma get_ordered_n_nodes_v1 (nodes : Finset ℝ) (n : ℕ) (x' : ℕ → ℝ) (
     linarith
   case succ nn =>
     sorry
+-/

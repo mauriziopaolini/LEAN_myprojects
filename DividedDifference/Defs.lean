@@ -38,14 +38,17 @@ def intOfHull (nodes : Finset ℝ) : Set ℝ :=
   else
     ∅
 
+/-
 noncomputable def remove_min_node (nodes : Finset ℝ) (H : nodes.Nonempty) : Finset ℝ :=
   Finset.erase nodes (Finset.min' nodes H)
+-/
 
 /-
 build a vector containing the smaller n elements of the set "nodes"
 or all elements if n < card nodes
 -/
 
+/-
 noncomputable def get_ordered_n_nodes (nodes : Finset ℝ) (n : ℕ) : ℕ → ℝ :=
   if nonempty : nodes.Nonempty then
     -- nodes is nonempty
@@ -56,6 +59,7 @@ noncomputable def get_ordered_n_nodes (nodes : Finset ℝ) (n : ℕ) : ℕ → �
       fun k => 0*k
   else
     fun k => 0*k
+-/
 
 /- for now just comment this out -/
 

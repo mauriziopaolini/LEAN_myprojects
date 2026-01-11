@@ -12,15 +12,18 @@ variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ} {nodes : 
 
 /-
 main0 is exactly the theorem extRolle in divided_difference.lean
-ideally one should e.g. allow for the nodes to be in any order
+ideally one should e.g. allow for the nodes to be in any order.
+See below
 -/
 
 /-
   example of using extRolle theorem
 -/
 
-
-theorem main0 (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+/-
+  nodes organized in a vector x : ℕ → ℝ
+-/
+theorem order_n_Rolle_V (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hx0 : a ≤ x 0) (hxn : x n ≤ b)
     (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
     (hfc : ContinuousOn f (Icc a b))
@@ -30,13 +33,70 @@ theorem main0 (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
   apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof
 
+variable {listnodes: List ℝ}
+
+/-
+  In this variant the nodes are still ordered, but organized in a List
+  structure
+-/
+
+theorem order_n_Rolle_L (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+    (hcard : listnodes.length = n + 1)
+    (hx0 : a ≤ listnodes.getD 0 0) (hxn : listnodes.getD n 0 ≤ b)
+    (h_ordered_nodes: ∀ k < n, (listnodes.getD k 0) < (listnodes.getD (k+1) 0))
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
+    (zerof : ∀ x ∈ listnodes, f x = 0)
+    : ∃ c ∈ Ioo (listnodes.getD 0 0) (listnodes.getD n 0), iteratedDeriv n f c = 0 := by
+
+  let xv := fun k => listnodes.getD k 0
+
+  have hnonempty : listnodes.length > 0 := by
+    grind
+  have hgetD_in_list : ∀ k ≤ n, (listnodes.getD k 0) ∈ listnodes := by
+    grind
+
+  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
+    grind
+  have hxv0_eq : xv 0 = listnodes.getD 0 0 := by
+    specialize hxvk_eq 0
+    simp at hxvk_eq
+    grind
+  have hxvn_eq : listnodes.getD n 0 = xv n := by
+    specialize hxvk_eq n
+    simp at hxvk_eq
+    grind
+  have hx0' : a ≤ xv 0 := by
+    grind
+
+  have hxn' : xv n ≤ b := by
+    grind
+
+  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
+    grind
+
+  have hxvn_eq : listnodes.getD n 0 = xv n := by
+    specialize hxvk_eq n
+    simp at hxvk_eq
+    grind
+
+  have zerof' : ∀ k ≤ n, f (xv k) = 0 := by
+    intro k hk
+    specialize hxvk_eq k hk
+    rw [hxvk_eq]
+    specialize zerof (listnodes.getD k 0)
+    specialize hgetD_in_list k hk
+    specialize zerof hgetD_in_list
+    exact zerof
 
 
-
-
+  rw [← hxv0_eq]
+  rw [hxvn_eq]
+  apply extRolle n hn_ne_0 hab hx0' hxn' h_ordered_nodes hfc hf zerof'
 
 
 /- try to use Finset(s) for the "main" theorem (work in progress)-/
+/- Use Finset.sort that produces an ordered list -/
 
 theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : Finset.card nodes = n + 1)
@@ -46,69 +106,108 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (zerof : ∀ x ∈ nodes, f (x) = 0)
     : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
 
-  let x' := get_ordered_n_nodes nodes (n+1)
+  let listnodes := Finset.sort nodes
+  let xv := fun k => listnodes.getD k 0
 
-  have hexistfirst : ∃ x ∈ nodes, x = x' 0 := by
-    let ⟨node, hnode⟩ := get_ordered_n_nodes_v1 nodes (n+1) 0
+  have hcard_ne_0 : 0 < nodes.card := by
+    grind
+  have hsetnonempty : nodes.Nonempty := by
+    rw [← Finset.card_pos]
+    exact hcard_ne_0
+  have hsamelength : listnodes.length = nodes.card := by
+    apply Finset.length_sort
+  have hnonempty : listnodes.length > 0 := by
+    rw [hsamelength]
+    exact hcard_ne_0
+  have hgetD_in_list : ∀ k ≤ n, (listnodes.getD k 0) ∈ listnodes := by
+    grind
+
+  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
+    grind
+  have hxv0_eq : xv 0 = listnodes.getD 0 0 := by
+    specialize hxvk_eq 0
+    simp at hxvk_eq
+    grind
+  have hxvn_eq : listnodes.getD n 0 = xv n := by
+    specialize hxvk_eq n
+    simp at hxvk_eq
+    grind
+
+  have hmap' : ∀ x, x ∈ listnodes ↔ x ∈ nodes := by
+    exact fun x => Finset.mem_sort fun a b => a ≤ b
+
+  have hmap : ∀ k ≤ n, xv k ∈ nodes := by
+    intro k hk
+    have hxvinlist : xv k ∈ listnodes := by
+      specialize hxvk_eq k
+      grind
+    specialize hmap' (xv k)
+    rw [← hmap']
+    exact hxvinlist
+
+  have h_ordered_nodes : ∀ k < n, (listnodes.getD k 0) < (listnodes.getD (k+1) 0) := by
+    clear hab h_nodes_in_ab
+    intro k hk
+    simp
 
 
-    let ⟨ node⟩ = get_ordered_n_nodes_v1 nodes (n+1) 0
-
-    apply get_ordered_n_nodes_v1
-
-  have h_ordered_nodes_extra : a ≤ x' 0 ∧ x' n ≤ b ∧
-      (∀ i ≤ n, ∀ j < i, (x' j) < x' i) ∧
-      (∀ k ≤ n, f (x' k) = 0) := by
-
-    constructor
-    have hexist : ∃ x ∈ nodes : x = x' 0 := by
-
-    apply get_ordered_n_nodes_v1 nodes (n+1) 0
-
+    --apply Finset.pairwise_sort
+    --apply Finset.sort_sorted_lt
     sorry
 
-    constructor
+  have hx0' : a ≤ xv 0 := by
     sorry
 
-    constructor
+  have hxn' : xv n ≤ b := by
     sorry
 
-    sorry
+  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
+    grind
 
-    --apply get_ordered_n_nodes_v1 nodes (n+1) 0
-    apply get_ordered_n_nodes_v0 nodes (n+1)
-    unfold get_ordered_n_nodes
+  have zerof' : ∀ k ≤ n, f (xv k) = 0 := by
+    intro k hk
+    specialize hxvk_eq k hk
+    rw [hxvk_eq]
+    specialize zerof (listnodes.getD k 0)
+    specialize hgetD_in_list k hk
+    specialize hmap' (listnodes.getD k 0)
+    rw [hmap'] at hgetD_in_list
+    specialize zerof hgetD_in_list
+    exact zerof
 
-    obtain ⟨x',hx'⟩ := get_ordered_n_nodes nodes (n+1)
+  have hextRolle : ∃ c ∈ Ioo (xv 0) (xv n), iteratedDeriv n f c = 0 := by
+    apply extRolle n hn_ne_0 hab hx0' hxn' h_ordered_nodes hfc hf zerof'
 
-    sorry
+  --unfold intOfHull
 
-  obtain ⟨x', hx'⟩ := h_ordered_nodes_extra
-
-  have hx0 : a ≤ x' 0 := by exact hx'.1
-  have hxn : x' n ≤ b := by exact hx'.2.1
-  have h_ordered_nodes : ∀ k < n, (x' k) < x' (k+1) := by
-    exact hx'.2.2.1
-  have zerof' : ∀ k ≤ n, f (x' k) = 0 := by
-    exact hx'.2.2.2
-
-  have hc : ∃ cc ∈ Ioo (x' 0) (x' n), iteratedDeriv n f cc = 0 := by
-    apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof'
-
-  obtain ⟨c, hc'⟩ := hc
-  have hcinx0xn : c ∈ Ioo (x' 0) (x' n) := by
-    exact hc'.1
+  obtain ⟨c, hc⟩ := hextRolle
   use c
   constructor
-  apply Ioo_subset_Ioo hx0 hxn
-  exact hcinx0xn
-  exact hc'.2
-  sorry
+  swap
 
+  exact hc.2
 
-noncomputable def mynodes : Finset ℝ := {0, 2, 1}
+  --have hc1 : c > xv 0 ∧ c < xv n := by
+  --  sorry
 
-noncomputable def mynodesvec : ℕ → ℝ := get_ordered_n_nodes mynodes 3
+  have hintOfHull : Ioo (xv 0) (xv n) ⊆ intOfHull nodes := by
+    --unfold intOfHull
+    have hleft : nodes.min' hsetnonempty ≤ xv 0 := by
+      sorry
+    have hright : nodes.max' hsetnonempty ≤ xv n := by
+      sorry
+    unfold intOfHull
 
-#check Finset.min' mynodes
-#check mynodesvec
+    sorry
+
+  grind
+
+def myset : Finset ℕ := {0, 2, 2, 1}
+--def mylist : Finset.sort myset
+
+#check myset.1
+#check myset.2
+#check myset.sort
+#check myset.pairwise_sort
+#check (myset.pairwise_sort (. ≤ .))
+#eval myset.val

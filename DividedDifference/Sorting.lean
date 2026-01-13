@@ -1,6 +1,6 @@
 import Mathlib.Tactic
 
-open Nat List
+open Real Nat List
 
 /-
  Let's try the James Oswald approach!
@@ -11,21 +11,21 @@ https://jamesoswald.dev/posts/lean4-insertion-sort/
 
 --Inserts a number n into a sorted list such
 --that the list remains sorted.
-def sInsert (n : Nat) : List Nat -> List Nat
-| [] => [n]
+noncomputable def sInsert (a : ℝ) : List ℝ → List ℝ
+| [] => [a]
 | h::t =>
-  if n ≤ h then
-    n :: h :: t
+  if a ≤ h then
+    a :: h :: t
   else
-    h :: sInsert n t
+    h :: sInsert a t
 
 --The insertion sort algo
-def mysort : List Nat -> List Nat
+noncomputable def mysort : List ℝ -> List ℝ
 | [] => []
 | h::t => sInsert h (mysort t)
 
 --mysorted is a predicate that takes a list and returns iff it is sorted
-def mysorted : List Nat -> Prop
+def mysorted : List ℝ -> Prop
 --An empty list is sorted
 | [] => True
 --A list containing a single element is sorted
@@ -38,8 +38,8 @@ def mysorted : List Nat -> Prop
 If a sorted list is passed to sInsert,
 it will return a sorted list after inserting a new elm.
 -/
-lemma sInsert_sorted (l : List Nat) (n : Nat) :
-mysorted l -> mysorted (sInsert n l) := by
+lemma sInsert_sorted (l : List ℝ) (a : ℝ) :
+mysorted l -> mysorted (sInsert a l) := by
   induction l
   --. case nil => simp [mysorted]
   . case nil =>
@@ -48,22 +48,24 @@ mysorted l -> mysorted (sInsert n l) := by
   . case cons h1 t1 ih =>
     cases t1
     . case nil =>
-      by_cases H2 : n ≤ h1
+      by_cases H2 : a ≤ h1
       . case pos => simp [sInsert, H2, mysorted]
       . case neg =>
         simp [sInsert, H2, mysorted]
-        exact Nat.le_of_lt (Nat.lt_of_not_le H2)
+        exact Std.le_of_not_ge H2
+        --exact Real.le_of_lt (Real.lt_of_not_le H2)
     . case cons h2 t =>
-      by_cases H2 : n ≤ h1
+      by_cases H2 : a ≤ h1
       . case pos => simp [sInsert, H2, mysorted]
       . case neg =>
-        by_cases H3 : n ≤ h2
+        by_cases H3 : a ≤ h2
         . case pos =>
           simp [sInsert, H2, mysorted, H3]
           intro _
           apply And.intro
           . case left =>
-            exact (Nat.le_of_lt (Nat.lt_of_not_le H2))
+            exact Std.le_of_not_ge H2
+            --exact (Nat.le_of_lt (Nat.lt_of_not_le H2))
         . case neg =>
           simp [sInsert, H2, mysorted, H3]
           intros H4 H5
@@ -75,7 +77,7 @@ mysorted l -> mysorted (sInsert n l) := by
             exact ih2
 
 
-theorem sort_sorted (l : List Nat) : mysorted (mysort l) := by
+theorem sort_sorted (l : List ℝ) : mysorted (mysort l) := by
   induction l
   . case nil => simp [mysort, mysorted]
   . case cons h t ih =>
@@ -84,27 +86,27 @@ theorem sort_sorted (l : List Nat) : mysorted (mysort l) := by
 
 
 /-
-A list l with n is a permutation of a list
-the list with n inserted into it.
+A list l with a is a permutation of a list
+the list with a inserted into it.
 -/
-lemma sInsert_perm (l : List Nat) (n : Nat) :
-List.Perm (n::l) (sInsert n l) := by
+lemma sInsert_perm (l : List ℝ) (a : ℝ) :
+List.Perm (a::l) (sInsert a l) := by
   induction l
   . case nil => simp [sInsert]
   . case _ h t ih =>
     simp [sInsert]
-    by_cases H : n ≤ h
+    by_cases H : a ≤ h
     . case pos => simp [H]
     . case neg =>
       simp [H];
       apply (List.Perm.trans _ (List.Perm.cons h ih))
-      exact List.Perm.swap h n t
+      exact List.Perm.swap h a t
 
 
 /-
 Sort returns a permutation of the input list.
 -/
-theorem sort_perm (l : List Nat) :
+theorem sort_perm (l : List ℝ) :
 List.Perm l (mysort l) := by
   induction l
   . case nil => simp [mysort]

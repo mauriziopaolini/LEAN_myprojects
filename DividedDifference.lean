@@ -100,129 +100,38 @@ variable {lnodes : List ℝ}
 theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)
     (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
-    (h_distinct_nodes: ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
+    (h_distinct_nodes : ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
+    --(h_distinct_nodes : ∀ i ∈ Fin (n+1), ∀ j ∈ Fin (n+1), i < j → lnodes.getD i 0 ≠ lnodes.getD j 0)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ lnodes, f x = 0)
     --: ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
-  sorry
+  let lonodes := mysort lnodes
 
-
-/- try to use Finset(s) for the "main" theorem (work in progress)-/
-/- Use Finset.sort that produces an ordered list -/
-
-theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
-    (hcard : Finset.card nodes = n + 1)
-    (h_nodes_in_ab : ∀ x ∈ nodes, x ∈ (Icc a b))
-    (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
-    (zerof : ∀ x ∈ nodes, f (x) = 0)
-    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
-
-  let listnodes := Finset.sort nodes
-  let xv := fun k => listnodes.getD k 0
-
-  have hcard_ne_0 : 0 < nodes.card := by
-    grind
-  have hsetnonempty : nodes.Nonempty := by
-    rw [← Finset.card_pos]
-    exact hcard_ne_0
-  have hsamelength : listnodes.length = nodes.card := by
-    apply Finset.length_sort
-  have hnonempty : listnodes.length > 0 := by
-    rw [hsamelength]
-    exact hcard_ne_0
-  have hgetD_in_list : ∀ k ≤ n, (listnodes.getD k 0) ∈ listnodes := by
-    grind
-
-  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
-    grind
-  have hxv0_eq : xv 0 = listnodes.getD 0 0 := by
-    specialize hxvk_eq 0
-    simp at hxvk_eq
-    grind
-  have hxvn_eq : listnodes.getD n 0 = xv n := by
-    specialize hxvk_eq n
-    simp at hxvk_eq
-    grind
-
-  have hmap' : ∀ x, x ∈ listnodes ↔ x ∈ nodes := by
-    exact fun x => Finset.mem_sort fun a b => a ≤ b
-
-  have hmap : ∀ k ≤ n, xv k ∈ nodes := by
-    intro k hk
-    have hxvinlist : xv k ∈ listnodes := by
-      specialize hxvk_eq k
-      grind
-    specialize hmap' (xv k)
-    rw [← hmap']
-    exact hxvinlist
-
-  have h_ordered_nodes : ∀ k < n, (listnodes.getD k 0) < (listnodes.getD (k+1) 0) := by
-    clear hab h_nodes_in_ab
-    intro k hk
-    simp
-
-
-    --apply Finset.pairwise_sort
-    --apply Finset.sort_sorted_lt
+  have hcard : lonodes.length = n + 1 := by
     sorry
 
-  have hx0' : a ≤ xv 0 := by
+  have hx0 : a ≤ lonodes.getD 0 0 := by
     sorry
 
-  have hxn' : xv n ≤ b := by
+  have hxn : lonodes.getD n 0 ≤ b := by
     sorry
 
-  have hxvk_eq : ∀ k ≤ n, xv k = listnodes.getD k 0 := by
-    grind
+  have zerof' : ∀ x ∈ lonodes, f x = 0 := by
+    sorry
 
-  have zerof' : ∀ k ≤ n, f (xv k) = 0 := by
-    intro k hk
-    specialize hxvk_eq k hk
-    rw [hxvk_eq]
-    specialize zerof (listnodes.getD k 0)
-    specialize hgetD_in_list k hk
-    specialize hmap' (listnodes.getD k 0)
-    rw [hmap'] at hgetD_in_list
-    specialize zerof hgetD_in_list
-    exact zerof
+  have h_ordered_nodes: ∀ k < n, (lonodes.getD k 0) < (lonodes.getD (k+1) 0) := by
+    sorry
 
-  have hextRolle : ∃ c ∈ Ioo (xv 0) (xv n), iteratedDeriv n f c = 0 := by
-    apply extRolle n hn_ne_0 hab hx0' hxn' h_ordered_nodes hfc hf zerof'
+  have h_nodes_interval : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ Ioo a b := by
+    sorry
 
-  --unfold intOfHull
+  have h_smaller : ∃ c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0), iteratedDeriv n f c = 0 := by
+    apply order_n_Rolle_L n hn_ne_0 hab hcard hx0 hxn h_ordered_nodes hfc hf zerof'
 
-  obtain ⟨c, hc⟩ := hextRolle
+  obtain ⟨c, hc⟩ := h_smaller
   use c
-  constructor
-  swap
 
-  exact hc.2
-
-  --have hc1 : c > xv 0 ∧ c < xv n := by
-  --  sorry
-
-  have hintOfHull : Ioo (xv 0) (xv n) ⊆ intOfHullS nodes := by
-    --unfold intOfHull
-    have hleft : nodes.min' hsetnonempty ≤ xv 0 := by
-      sorry
-    have hright : nodes.max' hsetnonempty ≤ xv n := by
-      sorry
-    unfold intOfHullS
-
-    sorry
-
-  grind
-
-def myset : Finset ℕ := {0, 2, 2, 1}
---def mylist : Finset.sort myset
-
-#check myset.1
-#check myset.2
-#check myset.sort
-#check myset.pairwise_sort
-#check (myset.pairwise_sort (. ≤ .))
-#eval myset.val
+  tauto

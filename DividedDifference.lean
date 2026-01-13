@@ -97,6 +97,21 @@ theorem order_n_Rolle_L (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
 variable {lnodes : List ℝ}
 
+lemma permfunction (x : ℝ) (l1 : List ℝ) (l2 : List ℝ) (h : List.Perm l1 l2)
+    (x_in_l1 : x ∈ l1) :
+    ∃ y ∈ l2, x = y := by
+  grind
+
+lemma permfunction' (x : ℝ) (l1 : List ℝ) (l2 : List ℝ) (h : List.Perm l1 l2)
+    (x_in_l2 : x ∈ l2) :
+    ∃ y ∈ l1, x = y := by
+  grind
+
+lemma elem_to_index (l : List ℝ) (x : ℝ) (x_in_l : x ∈ l) (nonempty : l.length > 0):
+    ∃ j < l.length, l.getD j 0 = x := by
+  apply List.mem_iff_get.1 x_in_l |> fun ⟨j, hj⟩ => ⟨j, by aesop⟩
+
+
 theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)
     (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
@@ -110,17 +125,62 @@ theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
   let lonodes := mysort lnodes
 
-  have hcard : lonodes.length = n + 1 := by
-    sorry
+  --let myperm := List.Perm lnodes (mysort lnodes)
+  have isperm : List.Perm lnodes (mysort lnodes) := by
+    exact sort_perm lnodes
+
+  have hsamecard : lnodes.length = lonodes.length := by
+    exact List.Perm.length_eq isperm
+
+  have hcard_o : lonodes.length = n + 1 := by
+    simp_all only [ne_eq, List.getD_eq_getElem?_getD]
+
+  have hperm : ∀ i ≤ n, ∃ j ≤ n, lonodes.getD i 0 = lnodes.getD j 0 := by
+    intro i hi
+    let x := lonodes.getD i 0
+    have hh : x ∈ lonodes := by
+      grind
+    --have hhh : ∃ y ∈ lnodes, y = x := by
+    --  grind
+    have x_in_nodes : x ∈ lnodes := by
+      grind
+    have hhh : ∃ j ≤ n, lnodes.getD j 0 = x := by
+      --apply List.mem_iff_get.1 x_in_nodes
+      --apply List.mem_iff_get.1 x_in_nodes |> fun ⟨j, hj⟩ => ⟨j, by aesop⟩
+
+      sorry
+    obtain ⟨j, hj⟩ := hhh
+    use j
+    --have j_le_n : j ≤ n := by
+    --  grind
+    rw [hj.2]
+    constructor
+    grind
+
+    grind
 
   have hx0 : a ≤ lonodes.getD 0 0 := by
-    sorry
+    specialize hperm 0
+    simp at hperm
+    obtain ⟨j, hj⟩ := hperm
+    --have hj1 : j ≤ n := by
+    --  grind
+    --have hj2 : lonodes.getD 0 0 = lnodes.getD j 0 := by
+    --  grind
+    --rw [hj2]
+    grind
 
   have hxn : lonodes.getD n 0 ≤ b := by
-    sorry
+    specialize hperm n
+    simp at hperm
+    obtain ⟨j, hj⟩ := hperm
+    grind
 
   have zerof' : ∀ x ∈ lonodes, f x = 0 := by
-    sorry
+    intro x hx
+    have hh : x ∈ lnodes := by
+      grind
+    grind
 
   have h_ordered_nodes: ∀ k < n, (lonodes.getD k 0) < (lonodes.getD (k+1) 0) := by
     sorry

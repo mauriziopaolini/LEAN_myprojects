@@ -5,6 +5,7 @@ import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import DividedDifference.divided_difference
+import DividedDifference.Sorting
 
 open Set
 
@@ -94,6 +95,20 @@ theorem order_n_Rolle_L (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   rw [hxvn_eq]
   apply extRolle n hn_ne_0 hab hx0' hxn' h_ordered_nodes hfc hf zerof'
 
+variable {lnodes : List ℝ}
+
+theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+    (hcard : lnodes.length = n + 1)
+    (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
+    (h_distinct_nodes: ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
+    (zerof : ∀ x ∈ lnodes, f x = 0)
+    --: ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  sorry
+
 
 /- try to use Finset(s) for the "main" theorem (work in progress)-/
 /- Use Finset.sort that produces an ordered list -/
@@ -104,7 +119,7 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ nodes, f (x) = 0)
-    : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
 
   let listnodes := Finset.sort nodes
   let xv := fun k => listnodes.getD k 0
@@ -190,13 +205,13 @@ theorem main (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   --have hc1 : c > xv 0 ∧ c < xv n := by
   --  sorry
 
-  have hintOfHull : Ioo (xv 0) (xv n) ⊆ intOfHull nodes := by
+  have hintOfHull : Ioo (xv 0) (xv n) ⊆ intOfHullS nodes := by
     --unfold intOfHull
     have hleft : nodes.min' hsetnonempty ≤ xv 0 := by
       sorry
     have hright : nodes.max' hsetnonempty ≤ xv n := by
       sorry
-    unfold intOfHull
+    unfold intOfHullS
 
     sorry
 

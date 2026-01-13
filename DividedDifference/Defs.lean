@@ -29,9 +29,39 @@ lemma push_vec_v0 (x : ℕ → ℝ) (y : ℕ → ℝ) (a : ℝ) (h : y = push_ve
     rw [h]
     rfl
 
-open Set
+open Set List
 
-def intOfHull (nodes : Finset ℝ) : Set ℝ :=
+
+--noncomputable def myminimum : List Nat → Nat
+--  | [] => 0
+--  | [a] => a
+--  |
+
+
+/-
+noncomputable def myminimum' (lnodes : List ℕ) : ℕ :=
+
+  if lnodes.length = 0 then
+    0
+  else
+    lnodes.getD (List.argmin id lnodes) 0
+    have hnonempty : 0 < lnodes.length := by
+
+      sorry
+
+    List.coe_minimum_of_length_pos
+-/
+
+/-
+def intOfHull (lnodes : List ℝ) : Set ℝ :=
+  if nonempty : lnodes.length > 0 then
+    -- lnodes is nonempty
+    Ioo (List.minimum lnodes) (List.maximum lnodes)
+  else
+    ∅
+-/
+
+def intOfHullS (nodes : Finset ℝ) : Set ℝ :=
   if nonempty : nodes.Nonempty then
     -- nodes is nonempty
     Ioo (Finset.min' nodes nonempty) (Finset.max' nodes nonempty)

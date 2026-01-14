@@ -5,6 +5,7 @@ import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import DividedDifference.Defs
+import DividedDifference.Sorting
 
 open Set
 
@@ -325,3 +326,47 @@ lemma regularderiv0 (f : ℝ → ℝ) (a b : ℝ) (s : ℕ) (hf : ContDiffOn ℝ
   apply f_eq_g_on_ab (derivWithin f (Ioo a b)) (deriv f)
   exact same_in_ab'
   exact ffp
+
+/-
+The following lemmas are used for the theorem that uses an unordered set of nodes
+-/
+
+
+lemma check_pairwise (ls : List ℝ) (ls_is : mysorted ls) :
+    ∀ k < ls.length - 1, ls.getD k 0 ≤ ls.getD (k+1) 0 := by
+
+  intro k
+  unfold mysorted at ls_is
+  -- By induction on $k$, we can show that for any $k < \text{length}(ls) - 1$, the $k$-th element is less than or equal to the $(k+1)$-th element.
+  induction' k with k ih generalizing ls;
+  · rcases ls with ( _ | ⟨ x, _ | ⟨ y, l ⟩ ⟩ ) <;> norm_num at * ; tauto;
+  · rcases ls with ( _ | ⟨ head, _ | ⟨ h2, t ⟩ ⟩ ) <;> norm_num at *;
+    -- Apply the induction hypothesis to the list h2 :: t.
+    specialize ih (h2 :: t);
+    -- Apply the induction hypothesis to the list h2 :: t, using the fact that h2 :: t is sorted.
+    apply ih; exact (by
+    cases t <;> aesop)
+
+
+lemma elem_to_index (l : List ℝ) (x : ℝ) (x_in_l : x ∈ l):
+    ∃ j < l.length, l.getD j 0 = x := by
+  apply List.mem_iff_get.1 x_in_l |> fun ⟨j, hj⟩ => ⟨j, by aesop⟩
+
+
+/- This proof was obtained by "aristotle"! -/
+lemma distinct_map_to_distinct {n : ℕ} (l1 l2 : List ℝ) (hn : n = l1.length) (isperm : List.Perm l1 l2)
+    (distinct_l1: ∀ i < n, ∀ j < n, i ≠ j → l1.getD i 0 ≠ l1.getD j 0)
+    : ∀ ii < n, ∀ jj < n, ii ≠ jj → l2.getD ii 0 ≠ l2.getD jj 0 := by
+  -- Since $l1$ has distinct elements, and $l2$ is a permutation of $l1$, $l2$ must also have distinct elements. We can prove this by contradiction.
+  by_contra h_contra
+  obtain ⟨ii, hi, jj, hj, hij, h_eq⟩ : ∃ ii < n, ∃ jj < n, ii ≠ jj ∧ l2.getD ii 0 = l2.getD jj 0 := by
+    exact by push_neg at h_contra; exact h_contra;
+  have h_distinct_l2 : List.Nodup l2 := by
+    have h_distinct_l1 : List.Nodup l1 := by
+      rw [ List.nodup_iff_injective_get ];
+      intros i j hij; specialize distinct_l1 i ( by simp [ hn ] ) j ( by simp [ hn ] ) ; aesop;
+    exact isperm.nodup_iff.mp h_distinct_l1;
+  have := List.nodup_iff_injective_get.mp h_distinct_l2; have := @this ⟨ ii, by
+    linarith [ isperm.length_eq ] ⟩ ⟨ jj, by
+    simpa [ hn, isperm.length_eq ] using hj ⟩ ; simp_all +decide ;
+  grind

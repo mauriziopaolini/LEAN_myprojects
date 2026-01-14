@@ -52,14 +52,12 @@ noncomputable def myminimum' (lnodes : List ℕ) : ℕ :=
     List.coe_minimum_of_length_pos
 -/
 
-/-
 def intOfHull (lnodes : List ℝ) : Set ℝ :=
-  if nonempty : lnodes.length > 0 then
+  if nonempty : 0 < lnodes.length then
     -- lnodes is nonempty
-    Ioo (List.minimum lnodes) (List.maximum lnodes)
+    Ioo (List.minimum_of_length_pos nonempty) (List.maximum_of_length_pos nonempty)
   else
     ∅
--/
 
 def intOfHullS (nodes : Finset ℝ) : Set ℝ :=
   if nonempty : nodes.Nonempty then

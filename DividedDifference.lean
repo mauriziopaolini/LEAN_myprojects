@@ -329,9 +329,61 @@ theorem order_n_Rolle_unorderedL_sharp (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   have h_smaller : ∃ c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0), iteratedDeriv n f c = 0 := by
     apply order_n_Rolle_L n hn_ne_0 hab hcard_o hx0 hxn h_ordered_nodes hfc hf zerof'
 
-  have hsame : intOfHull lnodes = Ioo (lonodes.getD 0 0) (lonodes.getD n 0) := by
+  have hsame : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ intOfHull lnodes := by
+    have nonempty : 0 < lnodes.length := by grind
+
+    let nmin := lnodes.minimum_of_length_pos nonempty
+    let nmax := lnodes.maximum_of_length_pos nonempty
+
+    --List.minimum_of_length_pos
+    clear hfc hf zerof zerof'
+
     unfold intOfHull
 
-    sorry
+    split_ifs
 
-  grind
+    have hgen : ∀ i ≤ n, nmin ≤ lnodes.getD i 0 ∧ lnodes.getD i 0 ≤ nmax := by
+      intro i hi
+      have i_lt_nlength : i < lnodes.length := by grind
+      have x_in_lnodes : lnodes.getD i 0 ∈ lnodes := by grind
+
+      constructor
+
+      apply List.minimum_of_length_pos_le_of_mem x_in_lnodes nonempty
+
+      apply List.le_maximum_of_length_pos_of_mem x_in_lnodes nonempty
+
+    have hgen' : ∀ x ∈ lnodes, nmin ≤ x ∧ x ≤ nmax := by
+      intro x hx
+
+      have h_index : ∃ i < lnodes.length, lnodes.getD i 0 = x := by
+        apply elem_to_index lnodes x
+        exact hx
+      obtain ⟨i, hi⟩ := h_index
+      have i_le_n : i ≤ n := by grind
+      specialize hgen i i_le_n
+      have lnodes_i_eq_x : lnodes.getD i 0 = x := by grind
+      rw [lnodes_i_eq_x] at hgen
+      exact hgen
+
+    grind
+  obtain ⟨c, hc⟩ := h_smaller
+  obtain ⟨hc1, hc2⟩ := hc
+
+  have h_subset : c ∈ intOfHull lnodes := by
+    --have hc1 : c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0) := by
+    --  tauto
+
+    specialize hsame hc1
+    exact hsame
+  use c
+
+  --constructor
+  --exact h_subset
+
+  --obtain ⟨hc1, hc2⟩ := hc
+
+  --have hc2 : iteratedDeriv n f c = 0 := by
+
+  --  sorry
+  --exact hc2

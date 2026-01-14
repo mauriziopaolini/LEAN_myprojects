@@ -95,139 +95,10 @@ theorem order_n_Rolle_L (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   rw [hxvn_eq]
   apply extRolle n hn_ne_0 hab hx0' hxn' h_ordered_nodes hfc hf zerof'
 
-/-
-Some lemmas useful for the sorting version: OBSOLETE
--/
-
-lemma elem_to_index_old (l : List ℝ) (x : ℝ) (x_in_l : x ∈ l):
-    ∃ j < l.length, l.getD j 0 = x := by
-  apply List.mem_iff_get.1 x_in_l |> fun ⟨j, hj⟩ => ⟨j, by aesop⟩
-
-
-/- This proof was obtained by "aristotle"! -/
-lemma distinct_map_to_distinct_old {n : ℕ} (l1 l2 : List ℝ) (hn : n = l1.length) (isperm : List.Perm l1 l2)
-    (distinct_l1: ∀ i < n, ∀ j < n, i ≠ j → l1.getD i 0 ≠ l1.getD j 0)
-    : ∀ ii < n, ∀ jj < n, ii ≠ jj → l2.getD ii 0 ≠ l2.getD jj 0 := by
-  -- Since $l1$ has distinct elements, and $l2$ is a permutation of $l1$, $l2$ must also have distinct elements. We can prove this by contradiction.
-  by_contra h_contra
-  obtain ⟨ii, hi, jj, hj, hij, h_eq⟩ : ∃ ii < n, ∃ jj < n, ii ≠ jj ∧ l2.getD ii 0 = l2.getD jj 0 := by
-    exact by push_neg at h_contra; exact h_contra;
-  have h_distinct_l2 : List.Nodup l2 := by
-    have h_distinct_l1 : List.Nodup l1 := by
-      rw [ List.nodup_iff_injective_get ];
-      intros i j hij; specialize distinct_l1 i ( by simp [ hn ] ) j ( by simp [ hn ] ) ; aesop;
-    exact isperm.nodup_iff.mp h_distinct_l1;
-  have := List.nodup_iff_injective_get.mp h_distinct_l2; have := @this ⟨ ii, by
-    linarith [ isperm.length_eq ] ⟩ ⟨ jj, by
-    simpa [ hn, isperm.length_eq ] using hj ⟩ ; simp_all +decide ;
-  grind
 
 
 variable {lnodes : List ℝ}
 
-/-
-theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
-    (hcard : lnodes.length = n + 1)
-    (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
-    (h_distinct_nodes : ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
-    --(h_distinct_nodes : ∀ i ∈ Fin (n+1), ∀ j ∈ Fin (n+1), i < j → lnodes.getD i 0 ≠ lnodes.getD j 0)
-    (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
-    (zerof : ∀ x ∈ lnodes, f x = 0)
-    --: ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
-    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
-
-  let lonodes := mysort lnodes
-
-  have isperm : List.Perm lnodes (mysort lnodes) := by
-    exact sort_perm lnodes
-
-  have hsamecard : lnodes.length = lonodes.length := by
-    exact List.Perm.length_eq isperm
-
-  have hcard_o : lonodes.length = n + 1 := by
-    simp_all only [ne_eq, List.getD_eq_getElem?_getD]
-
-  have hperm : ∀ i ≤ n, ∃ j ≤ n, lonodes.getD i 0 = lnodes.getD j 0 := by
-    intro i hi
-    let x := lonodes.getD i 0
-    have hh : x ∈ lonodes := by
-      grind
-
-    have x_in_nodes : x ∈ lnodes := by
-      grind
-    have hhh : ∃ j < lnodes.length, lnodes.getD j 0 = x := by
-      apply elem_to_index lnodes x x_in_nodes
-
-    obtain ⟨j, hj⟩ := hhh
-    use j
-
-    rw [hj.2]
-    constructor
-    grind
-
-    grind
-
-  have hx0 : a ≤ lonodes.getD 0 0 := by
-    specialize hperm 0
-    simp at hperm
-    obtain ⟨j, hj⟩ := hperm
-
-    grind
-
-  have hxn : lonodes.getD n 0 ≤ b := by
-    specialize hperm n
-    simp at hperm
-    obtain ⟨j, hj⟩ := hperm
-    grind
-
-  have zerof' : ∀ x ∈ lonodes, f x = 0 := by
-    intro x hx
-    have hh : x ∈ lnodes := by
-      grind
-    grind
-
-  have h_ordered_nodes_weak: ∀ k < n, (lonodes.getD k 0) ≤  (lonodes.getD (k+1) 0) := by
-    have issorted : mysorted lonodes := by
-      exact sort_sorted lnodes
-
-    have hn : n = lonodes.length - 1 := by grind
-    rw [hn]
-    apply check_pairwise lonodes issorted
-
-  have h_nodes_interval : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ Ioo a b := by
-    grind
-  --have hcard_o : lonodes.length = n + 1 := by
-  --  grind
-  have hcard' : n + 1 = lnodes.length := by
-    rw [hcard]
-  -- now we must make assumption h_ordered_nodes stronger with < instead of ≤
-  have h_distinct_nodes' : ∀ i ≤ n, ∀ j ≤ n, i ≠ j → lnodes.getD i 0 ≠ lnodes.getD j 0 := by
-    grind
-
-  have h_distinct_nodes'' : ∀ ii < n+1, ∀ jj < n+1, ii ≠ jj → lonodes.getD ii 0 ≠ lonodes.getD jj 0 := by
-
-    apply distinct_map_to_distinct lnodes lonodes hcard' isperm
-    grind
-
-  have h_ordered_nodes : ∀ k < n, (lonodes.getD k 0) < (lonodes.getD (k+1) 0) := by
-    intro k hk
-    specialize h_ordered_nodes_weak k hk
-    have hk' : k < n + 1 := by grind
-    have hk'' : k + 1 < n + 1 := by grind
-    specialize h_distinct_nodes'' k hk' (k+1) hk''
-    simp at h_distinct_nodes''
-    push_neg at h_distinct_nodes''
-    grind
-
-  have h_smaller : ∃ c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0), iteratedDeriv n f c = 0 := by
-    apply order_n_Rolle_L n hn_ne_0 hab hcard_o hx0 hxn h_ordered_nodes hfc hf zerof'
-
-  obtain ⟨c, hc⟩ := h_smaller
-  use c
-
-  tauto
--/
 
 /-
 Main result: there is c ∈ intOfHull of the nodes, the nodes are given as a
@@ -242,7 +113,6 @@ theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ lnodes, f x = 0)
     : ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
-    --: ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
   let lonodes := mysort lnodes
 
@@ -388,100 +258,39 @@ theorem order_n_Rolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)
     (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
     (h_distinct_nodes : ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
-    --(h_distinct_nodes : ∀ i ∈ Fin (n+1), ∀ j ∈ Fin (n+1), i < j → lnodes.getD i 0 ≠ lnodes.getD j 0)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ lnodes, f x = 0)
-    --: ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
-  let lonodes := mysort lnodes
+  have c_in_intOfHull : ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
 
-  have isperm : List.Perm lnodes (mysort lnodes) := by
-    exact sort_perm lnodes
+    apply order_n_Rolle_unorderedL n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes
+        hfc hf zerof
 
-  have hsamecard : lnodes.length = lonodes.length := by
-    exact List.Perm.length_eq isperm
+  have hweaker : intOfHull lnodes ⊆ Ioo a b:= by
+    have nonempty : 0 < lnodes.length := by grind
 
-  have hcard_o : lonodes.length = n + 1 := by
-    simp_all only [ne_eq, List.getD_eq_getElem?_getD]
+    let nmin := lnodes.minimum_of_length_pos nonempty
+    let nmax := lnodes.maximum_of_length_pos nonempty
 
-  have hperm : ∀ i ≤ n, ∃ j ≤ n, lonodes.getD i 0 = lnodes.getD j 0 := by
-    intro i hi
-    let x := lonodes.getD i 0
-    have hh : x ∈ lonodes := by
-      grind
+    clear hfc hf zerof
 
-    have x_in_nodes : x ∈ lnodes := by
-      grind
-    have hhh : ∃ j < lnodes.length, lnodes.getD j 0 = x := by
-      apply elem_to_index lnodes x x_in_nodes
+    unfold intOfHull
+    split_ifs
+    have nmin_in_lnodes : nmin ∈ lnodes := by
+      exact List.minimum_of_length_pos_mem nonempty
 
-    obtain ⟨j, hj⟩ := hhh
-    use j
-
-    rw [hj.2]
-    constructor
-    grind
+    have nmax_in_lnodes : nmax ∈ lnodes := by
+      exact List.maximum_of_length_pos_mem nonempty
 
     grind
 
-  have hx0 : a ≤ lonodes.getD 0 0 := by
-    specialize hperm 0
-    simp at hperm
-    obtain ⟨j, hj⟩ := hperm
+  obtain ⟨c, hc⟩ := c_in_intOfHull
+  obtain ⟨hc1, hc2⟩ := hc
 
-    grind
-
-  have hxn : lonodes.getD n 0 ≤ b := by
-    specialize hperm n
-    simp at hperm
-    obtain ⟨j, hj⟩ := hperm
-    grind
-
-  have zerof' : ∀ x ∈ lonodes, f x = 0 := by
-    intro x hx
-    have hh : x ∈ lnodes := by
-      grind
-    grind
-
-  have h_ordered_nodes_weak: ∀ k < n, (lonodes.getD k 0) ≤  (lonodes.getD (k+1) 0) := by
-    have issorted : mysorted lonodes := by
-      exact sort_sorted lnodes
-
-    have hn : n = lonodes.length - 1 := by grind
-    rw [hn]
-    apply check_pairwise lonodes issorted
-
-  have h_nodes_interval : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ Ioo a b := by
-    grind
-  --have hcard_o : lonodes.length = n + 1 := by
-  --  grind
-  have hcard' : n + 1 = lnodes.length := by
-    rw [hcard]
-  /- now we must make assumption h_ordered_nodes stronger with < instead of ≤ -/
-  have h_distinct_nodes' : ∀ i ≤ n, ∀ j ≤ n, i ≠ j → lnodes.getD i 0 ≠ lnodes.getD j 0 := by
-    grind
-
-  have h_distinct_nodes'' : ∀ ii < n+1, ∀ jj < n+1, ii ≠ jj → lonodes.getD ii 0 ≠ lonodes.getD jj 0 := by
-
-    apply distinct_map_to_distinct lnodes lonodes hcard' isperm
-    grind
-
-  have h_ordered_nodes : ∀ k < n, (lonodes.getD k 0) < (lonodes.getD (k+1) 0) := by
-    intro k hk
-    specialize h_ordered_nodes_weak k hk
-    have hk' : k < n + 1 := by grind
-    have hk'' : k + 1 < n + 1 := by grind
-    specialize h_distinct_nodes'' k hk' (k+1) hk''
-    simp at h_distinct_nodes''
-    push_neg at h_distinct_nodes''
-    grind
-
-  have h_smaller : ∃ c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0), iteratedDeriv n f c = 0 := by
-    apply order_n_Rolle_L n hn_ne_0 hab hcard_o hx0 hxn h_ordered_nodes hfc hf zerof'
-
-  obtain ⟨c, hc⟩ := h_smaller
   use c
 
+  constructor
   tauto
+  exact hc2

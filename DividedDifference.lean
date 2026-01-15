@@ -4,7 +4,7 @@
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
-import DividedDifference.divided_difference
+import DividedDifference.HigherOrderRolle
 import DividedDifference.Sorting
 
 open Set

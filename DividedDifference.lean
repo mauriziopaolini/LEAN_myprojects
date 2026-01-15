@@ -9,22 +9,42 @@ import DividedDifference.Sorting
 
 open Set
 
-variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ} {nodes : Finset ℝ}
+variable {f : ℝ → ℝ} {a b : ℝ}
 
 /-
-main0 is exactly the theorem extRolle in divided_difference.lean
-ideally one should e.g. allow for the nodes to be in any order.
-See below
--/
+There are four versions of the "order_n_Rolle".  It generally state that
+a sufficiently regular function that vanishes at n+1 distinct nodes in [a,b]
+admits a point within the set of nodes where its n-th derivative vanishes.
 
-/-
-  example of using extRolle theorem
+- order_n_Rolle_V
+
+espects the n+1 nodes as the first values of a sequence x : ℕ → ℝ in strictly
+increasing order, then the resulting point c satisfies c ∈ ( x 0, x n )
+
+- order_n_Rolle_L
+
+same as above, but the nodes are given as the elements of a List ℝ, still they
+are required to be given in increasing order
+
+- order_n_Rolle_unorderedL
+
+same as above, but the nodes are not required to be in increasing order.  Of course
+they must be mutually disjoint
+
+- order_n_Rolle_unorderedL_weak
+
+weaker version of above, where the resulting point c is only guaranteed to
+be in (a,b).  This could be useful if one does not want to use the definition of
+"intOfHull" (the interior of the convex hull of the set of nodes) which might be
+inconvenient to manage.  Still of course the user can take a and b as the minimum
+and maximum of the nodes and still recovere the stronger result
 -/
 
 /-
   nodes organized in a vector x : ℕ → ℝ
 -/
-theorem order_n_Rolle_V (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+
+theorem order_n_Rolle_V {x : ℕ → ℝ} (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hx0 : a ≤ x 0) (hxn : x n ≤ b)
     (h_ordered_nodes: ∀ k < n, (x k) < x (k+1))
     (hfc : ContinuousOn f (Icc a b))
@@ -34,14 +54,12 @@ theorem order_n_Rolle_V (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
   apply extRolle n hn_ne_0 hab hx0 hxn h_ordered_nodes hfc hf zerof
 
-variable {listnodes: List ℝ}
-
 /-
   In this variant the nodes are still ordered, but organized in a List
   structure
 -/
 
-theorem order_n_Rolle_L (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+theorem order_n_Rolle_L {listnodes : List ℝ} (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : listnodes.length = n + 1)
     (hx0 : a ≤ listnodes.getD 0 0) (hxn : listnodes.getD n 0 ≤ b)
     (h_ordered_nodes: ∀ k < n, (listnodes.getD k 0) < (listnodes.getD (k+1) 0))

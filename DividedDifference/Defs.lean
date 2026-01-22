@@ -5,6 +5,7 @@ We use a "vector" to store the nodes, we need to use it like a stack
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.LinearAlgebra.Lagrange
 
 variable {f : ℝ → ℝ} {a b : ℝ} {x : ℕ → ℝ} {n p q : ℕ}
 
@@ -30,13 +31,6 @@ lemma push_vec_v0 (x : ℕ → ℝ) (y : ℕ → ℝ) (a : ℝ) (h : y = push_ve
     rfl
 
 open Set List
-
-
---noncomputable def myminimum : List Nat → Nat
---  | [] => 0
---  | [a] => a
---  |
-
 
 /-
 noncomputable def myminimum' (lnodes : List ℕ) : ℕ :=
@@ -67,55 +61,21 @@ def intOfHullS (nodes : Finset ℝ) : Set ℝ :=
     ∅
 
 /-
-noncomputable def remove_min_node (nodes : Finset ℝ) (H : nodes.Nonempty) : Finset ℝ :=
-  Finset.erase nodes (Finset.min' nodes H)
+Definition of divided difference.  It takes three arguments:
+- s: a Finset ℕ (set of indices)
+- v: vector of nodes
+- r: vector of nodal values of some function
 -/
 
-/-
-build a vector containing the smaller n elements of the set "nodes"
-or all elements if n < card nodes
--/
+open Polynomial
 
-/-
-noncomputable def get_ordered_n_nodes (nodes : Finset ℝ) (n : ℕ) : ℕ → ℝ :=
-  if nonempty : nodes.Nonempty then
-    -- nodes is nonempty
-    if n_ne_0 : n > 0 then
-      push_vec (Finset.min' nodes nonempty)
-       (get_ordered_n_nodes (remove_min_node nodes nonempty) (n-1))
-    else
-      fun k => 0*k
-  else
-    fun k => 0*k
--/
+noncomputable def divided_difference (s : Finset ℕ) (v : ℕ → ℝ) (r : ℕ → ℝ) : ℝ :=
+  coeff (Lagrange.interpolate s v r) (s.card - 1)
 
-/- for now just comment this out -/
 
-/-
-lemma get_ordered_n_nodes_v0 (nodes : Finset ℝ) (n : ℕ) (x' : ℕ → ℝ)
-    (h: x' = get_ordered_n_nodes nodes n) (n_eq_card : n = Finset.card nodes):
-    ∀ i < n, ∀ j < i, x' j < x' i := by
+lemma divided_difference_is_exact {n : ℕ} (s : Finset ℕ) (v : ℕ → ℝ) (r : ℕ → ℝ) (hcard : s.card = n+1):
+    divided_difference s v r = coeff (Lagrange.interpolate s v r) n := by
 
-  rw [h]
-  unfold get_ordered_n_nodes
-  intro i hi j hj
-
-  cases hn : n
-  case zero =>
-    sorry
-  case succ nn =>
-    sorry
-
-lemma get_ordered_n_nodes_v1 (nodes : Finset ℝ) (n : ℕ) (x' : ℕ → ℝ) (i : ℕ)
-    (h : x' = get_ordered_n_nodes nodes n) (n_eq_card : n = Finset.card nodes) (hi : i < n):
-    x' i ∈ nodes := by
-
-  rw [h]
-  unfold get_ordered_n_nodes
-
-  cases hn : n
-  case zero =>
-    linarith
-  case succ nn =>
-    sorry
--/
+  unfold divided_difference
+  rw [hcard]
+  simp

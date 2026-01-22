@@ -4,6 +4,7 @@
 import Mathlib.Analysis.Calculus.LocalExtr.Rolle
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.LinearAlgebra.Lagrange
 import DividedDifference.HigherOrderRolle
 import DividedDifference.Sorting
 
@@ -110,5 +111,58 @@ theorem order_n_Rolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   apply extRolle_unorderedL_weak n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes hfc hf zerof
 
 
+/- Lagrange interpolation: given a finset `s : Finset ι`, a nodal map `v : ι → F` injective on
+`s` and a value function `r : ι → F`, `interpolate s v r` is the unique
+polynomial of degree `< #s` that takes value `r i` on `v i` for all `i` in `s`. -/
 
-#print axioms order_n_Rolle_unorderedL_weak
+/-
+def interpolate (s : Finset ι) (v : ι → F) : (ι → F) →ₗ[F] F[X] where
+  toFun r := ∑ i ∈ s, C (r i) * Lagrange.basis s v i
+  map_add' f g := by
+    simp_rw [← Finset.sum_add_distrib]
+    have h : (fun x => C (f x) * Lagrange.basis s v x + C (g x) * Lagrange.basis s v x) =
+    (fun x => C ((f + g) x) * Lagrange.basis s v x) := by
+      simp_rw [← add_mul, ← C_add, Pi.add_apply]
+    rw [h]
+  map_smul' c f := by
+    simp_rw [Finset.smul_sum, C_mul', smul_smul, Pi.smul_apply, RingHom.id_apply, smul_eq_mul]
+-/
+
+open Polynomial
+namespace Polynomial
+open scoped Finset
+
+open Function Fintype
+
+variable {I : Type*}
+--variable {s : Finset I}
+
+theorem order_n_Rolle_set_of_indices (n : ℕ) (s : Finset I) (nodes : I → ℝ) (hab : a < b)
+    (hcard : #s = n + 1)
+    (hx0 : ∀ i ∈ s, a ≤ nodes i) (hxn : ∀ i ∈ s, nodes i ≤ b)
+    (h_distinct_nodes : ∀ i ∈ s, ∀ j ∈ s, nodes i ≠ nodes j)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ i ∈ s, f (nodes i) = 0)
+    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  sorry
+
+/-
+def divided_difference (f : ℝ → ℝ) (lnodes : List ℝ) : ℝ :=
+  0
+
+theorem divided_difference_eq_nth_deriv (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
+    (hcard : lnodes.length = n + 1)
+    (hx0 : ∀ x ∈ lnodes, a ≤ x) (hxn : ∀ x ∈ lnodes, x ≤ b)
+    (h_distinct_nodes : ∀ j ≤ n, ∀ i < j, lnodes.getD i 0 ≠ lnodes.getD j 0)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
+    : ∃ c ∈ Ioo a b, (divided_difference f lnodes) = iteratedDeriv n f c := by
+
+  have hs : s = Finset (n+1)
+  have hinterp : Lagrange.interpolate
+  sorry
+
+
+-/

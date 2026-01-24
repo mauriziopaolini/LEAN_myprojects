@@ -245,7 +245,188 @@ theorem extRolle_L {listnodes : List ℝ} (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a <
 
 
 
+
+
+
 variable {lnodes : List ℝ}
+
+theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
+    --: ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  let lnodes : List ℝ := Finset.sort nodes
+
+  have hsorted : List.Pairwise (. ≤ .) lnodes := by
+    aesop
+
+  have hnodup : lnodes.Nodup := by
+    apply Finset.sort_nodup
+
+  have hsorted' : ∀ i j : Fin lnodes.length, i < j → lnodes[i] < lnodes[j] := by
+    intro i j hij
+    have hw : lnodes[i] ≤ lnodes[j] := by
+      apply List.pairwise_iff_get.1 hsorted _ _ hij
+    have hne : lnodes[i] ≠ lnodes[j] := by
+      unfold List.Nodup at hnodup
+      apply List.pairwise_iff_get.1 hnodup _ _ hij
+
+    grind
+
+  have hcard' : lnodes.length = n+1 := by
+    aesop
+
+  have h_ordered_nodes : ∀ k < n, (lnodes.getD k 0) < (lnodes.getD (k+1) 0) := by
+    intro i hi
+    let j := i + 1
+
+    have i_ln_np1 : i < n + 1 := by
+      grind
+
+    simp_all only [ne_eq, Fin.getElem_fin, List.getD_eq_getElem?_getD, add_lt_add_iff_right, getElem?_pos,
+      Option.getD_some, gt_iff_lt]
+
+    specialize hsorted'
+    have rev_cast_i : ∃ ii : Fin lnodes.length, ii = i := by
+      have hi' : i < lnodes.length := by
+        rw [hcard']
+        grind
+      exact CanLift.prf i hi'
+
+    obtain ⟨ii, hii⟩ := rev_cast_i
+
+    have rev_cast_j : ∃ jj : Fin lnodes.length, jj = i+1 := by
+      have hj' : j < lnodes.length := by
+        rw [hcard']
+        grind
+      exact CanLift.prf j hj'
+
+    obtain ⟨jj, hjj⟩ := rev_cast_j
+    specialize hsorted' ii jj
+
+    have ii_lt_jj : ii < jj := by
+      grind
+
+    specialize hsorted' ii_lt_jj
+    grind
+
+  have hx0' : ∀ x ∈ lnodes, a ≤ x := by aesop
+  have hx0'' : a ≤ lnodes.getD 0 0 := by grind
+  have hxn' : ∀ x ∈ lnodes, x ≤ b := by aesop
+  have hxn'' : lnodes.getD n 0 ≤ b := by grind
+
+  have zerof' : ∀ x ∈ lnodes, f x = 0 := by aesop
+
+  have h_smaller : ∃ c ∈ Ioo (lnodes.getD 0 0) (lnodes.getD n 0), iteratedDeriv n f c = 0 := by
+
+    apply extRolle_L n hn_ne_0 hab hcard' hx0'' hxn'' h_ordered_nodes hfc hf zerof'
+
+  have hsame : Ioo (lnodes.getD 0 0) (lnodes.getD n 0) ⊆ intOfHullS nodes := by
+    have nonempty0 : 0 < nodes.card := by grind
+
+    have nonempty : nodes.Nonempty := by
+      exact Finset.card_pos.mp nonempty0
+
+    let nmin := nodes.min' nonempty
+    let nmax := nodes.max' nonempty
+
+    clear hfc hf zerof zerof'
+
+    unfold intOfHullS
+
+    split_ifs
+
+    have hgen1 : ∀ x ∈ nodes, nmin ≤ x := by
+      exact fun x a => Finset.min'_le nodes x a
+    have hgen2 : ∀ x ∈ nodes, x ≤ nmax := by
+      exact fun x a => Finset.le_max' nodes x a
+
+    have hgen' : ∀ x ∈ lnodes, x ∈ nodes := by aesop
+
+    have hgen1'' : lnodes.getD 0 0 ∈ nodes := by
+      specialize hgen' (lnodes.getD 0 0)
+      simp_all only [ne_eq, Fin.getElem_fin, List.getD_eq_getElem?_getD, add_lt_add_iff_right, getElem?_pos,
+        Option.getD_some, lt_add_iff_pos_left, add_pos_iff, zero_lt_one, or_true, List.getElem_mem, lt_add_iff_pos_right,
+        mem_Ioo, forall_const]
+
+    have hgen1''' : nmin ≤ lnodes.getD 0 0 := by
+      simp_all only [ne_eq, Fin.getElem_fin, List.getD_eq_getElem?_getD, add_lt_add_iff_right, getElem?_pos,
+        Option.getD_some, implies_true, lt_add_iff_pos_left, add_pos_iff, zero_lt_one, or_true, List.getElem_mem,
+        lt_add_iff_pos_right, mem_Ioo]
+
+    have hgen2''' : lnodes.getD n 0 ≤ nmax := by
+      simp_all only [ne_eq, Fin.getElem_fin, List.getD_eq_getElem?_getD, add_lt_add_iff_right, getElem?_pos,
+        Option.getD_some, implies_true, lt_add_iff_pos_left, add_pos_iff, zero_lt_one, or_true, List.getElem_mem,
+        lt_add_iff_pos_right, mem_Ioo]
+
+    have hgen2'' : lnodes.getD n 0 ∈ nodes := by
+      specialize hgen' (lnodes.getD n 0)
+      simp_all only [ne_eq, Fin.getElem_fin, List.getD_eq_getElem?_getD, add_lt_add_iff_right, getElem?_pos,
+        Option.getD_some, lt_add_iff_pos_left, add_pos_iff, zero_lt_one, or_true, List.getElem_mem, lt_add_iff_pos_right,
+        mem_Ioo, forall_const]
+
+    gcongr
+
+  obtain ⟨c, hc⟩ := h_smaller
+  obtain ⟨hc1, hc2⟩ := hc
+
+  have h_subset : c ∈ intOfHullS nodes := by
+    --have hc1 : c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0) := by
+    --  tauto
+
+    specialize hsame hc1
+    exact hsame
+  use c
+
+
+theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  have c_in_intOfHullS : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
+
+    apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+
+  have hweaker : intOfHullS nodes ⊆ Ioo a b:= by
+    have nonempty0 : 0 < nodes.card := by grind
+
+    have nonempty : nodes.Nonempty := by
+      exact Finset.card_pos.mp nonempty0
+
+    let nmin := nodes.min' nonempty
+    let nmax := nodes.max' nonempty
+
+    clear hfc hf zerof
+
+    unfold intOfHullS
+    split_ifs
+
+
+    have hgen1 : ∀ x ∈ nodes, nmin ≤ x := by
+      exact fun x a => Finset.min'_le nodes x a
+    have hgen2 : ∀ x ∈ nodes, x ≤ nmax := by
+      exact fun x a => Finset.le_max' nodes x a
+
+    gcongr
+
+    exact (Finset.le_min'_iff nodes nonempty).mpr hx0
+
+    exact Finset.max'_le nodes nonempty b hxn
+
+
+  tauto
+
+
 
 theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)

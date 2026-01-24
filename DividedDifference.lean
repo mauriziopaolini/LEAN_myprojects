@@ -111,6 +111,29 @@ theorem order_n_Rolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   apply extRolle_unorderedL_weak n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes hfc hf zerof
 
 
+theorem order_n_Rolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
+
+  apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+
+
+theorem order_n_Rolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  apply extRolle_F_weak n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+
 /- Lagrange interpolation: given a finset `s : Finset ι`, a nodal map `v : ι → F` injective on
 `s` and a value function `r : ι → F`, `interpolate s v r` is the unique
 polynomial of degree `< #s` that takes value `r i` on `v i` for all `i` in `s`. -/
@@ -130,23 +153,8 @@ def interpolate (s : Finset ι) (v : ι → F) : (ι → F) →ₗ[F] F[X] where
 
 open Polynomial
 namespace Polynomial
-open scoped Finset
-
 open Function Fintype
-
-variable {I : Type*}
---variable {s : Finset I}
-
-theorem order_n_Rolle_set_of_indices (n : ℕ) (s : Finset I) (nodes : I → ℝ) (hab : a < b)
-    (hcard : #s = n + 1)
-    (hx0 : ∀ i ∈ s, a ≤ nodes i) (hxn : ∀ i ∈ s, nodes i ≤ b)
-    (h_distinct_nodes : ∀ i ∈ s, ∀ j ∈ s, nodes i ≠ nodes j)
-    (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
-    (zerof : ∀ i ∈ s, f (nodes i) = 0)
-    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
-
-  sorry
+open scoped Finset
 
 /-
 def divided_difference (f : ℝ → ℝ) (lnodes : List ℝ) : ℝ :=

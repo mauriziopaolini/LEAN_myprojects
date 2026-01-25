@@ -49,20 +49,36 @@ def intOfHullL (lnodes : List ℝ) : Set ℝ :=
     ∅
 
 /-
-Definition of divided difference.  It takes three arguments:
-- s: a Finset ℕ (set of indices)
-- v: vector of nodes
-- r: vector of nodal values of some function
+Minimalistic definition of divided difference.  It takes two arguments:
+ . nodes: a Finset ℝ (set of nodes)
+ . f: function ℝ → ℝ
 -/
 
 open Polynomial
 
-noncomputable def divided_difference (s : Finset ℕ) (v : ℕ → ℝ) (r : ℕ → ℝ) : ℝ :=
+/-
+--variable {I : Type*} [DecidableEq I]
+
+noncomputable def divided_difference_fvalues (s : Finset I) (v : I → ℝ) (r : I → ℝ) : ℝ :=
   coeff (Lagrange.interpolate s v r) (s.card - 1)
 
 
 lemma divided_difference_is_exact {n : ℕ} (s : Finset ℕ) (v : ℕ → ℝ) (r : ℕ → ℝ) (hcard : s.card = n+1):
-    divided_difference s v r = coeff (Lagrange.interpolate s v r) n := by
+    divided_difference_fvalues s v r = coeff (Lagrange.interpolate s v r) n := by
+
+  unfold divided_difference_fvalues
+  rw [hcard]
+  simp
+-/
+
+def my_id : ℝ → ℝ := (fun x : ℝ ↦ x)
+
+noncomputable def divided_difference (f : ℝ → ℝ) (nodes : Finset ℝ) : ℝ :=
+  coeff (Lagrange.interpolate nodes my_id f) (nodes.card - 1)
+
+lemma divided_difference_is_exact {n : ℕ} (nodes : Finset ℝ) (f : ℝ → ℝ)
+    (hcard : nodes.card = n+1)
+    : divided_difference f nodes = coeff (Lagrange.interpolate nodes my_id f) n := by
 
   unfold divided_difference
   rw [hcard]

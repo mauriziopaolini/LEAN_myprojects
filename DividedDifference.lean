@@ -104,13 +104,29 @@ theorem order_n_Rolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
   apply extRolle_F_weak n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
 
 
+/-
+Main result: order n divided difference equals the nth derivative of f divided
+by n!
+-/
 
-variable {lnodes : List ℝ}
+theorem divided_difference_eq_deriv_n (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    : ∃ c ∈ intOfHull nodes, divided_difference f nodes = (iteratedDeriv n f c)/(Nat.factorial n) := by
+
+  sorry
+
+
 
 /-
 Obsoleted: Main result: there is c ∈ intOfHull of the nodes, the nodes are given as a
 list of n+1 distict points in [a,b]
 -/
+
+variable {lnodes : List ℝ}
 
 theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)

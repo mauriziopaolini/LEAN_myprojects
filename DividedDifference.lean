@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.LinearAlgebra.Lagrange
 import DividedDifference.HigherOrderRolle
-import DividedDifference.Sorting
 
 open Set
 
@@ -72,13 +71,44 @@ theorem order_n_Rolle_L {listnodes : List ℝ} (n:ℕ) (hn_ne_0 : n ≠ 0) (hab 
   apply extRolle_L n hn_ne_0 hab hcard hx0 hxn h_ordered_nodes hfc hf zerof
 
 
+/-
+Main result: there is c ∈ intOfHullS of the nodes, the nodes are given as a
+list of n+1 distict points in [a,b]
+-/
+
+theorem order_n_Rolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
+
+  apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+
+/-
+Weak version where we are satisfied with c ∈ (a,b)
+we should prove this using the main theorem
+-/
+
+theorem order_n_Rolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
+    (hab : a < b)
+    (hcard : nodes.card = n + 1)
+    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hfc : ContinuousOn f (Icc a b))
+    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
+    (zerof : ∀ x ∈ nodes, f x = 0)
+    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  apply extRolle_F_weak n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+
 
 
 variable {lnodes : List ℝ}
 
-
 /-
-Main result: there is c ∈ intOfHull of the nodes, the nodes are given as a
+Obsoleted: Main result: there is c ∈ intOfHull of the nodes, the nodes are given as a
 list of n+1 distict points in [a,b]
 -/
 
@@ -89,7 +119,7 @@ theorem order_n_Rolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ lnodes, f x = 0)
-    : ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ intOfHullL lnodes, iteratedDeriv n f c = 0 := by
 
   apply extRolle_unorderedL n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes hfc hf zerof
 
@@ -110,29 +140,6 @@ theorem order_n_Rolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
   apply extRolle_unorderedL_weak n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes hfc hf zerof
 
-
-theorem order_n_Rolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
-    (hab : a < b)
-    (hcard : nodes.card = n + 1)
-    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
-    (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
-    (zerof : ∀ x ∈ nodes, f x = 0)
-    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
-
-  apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
-
-
-theorem order_n_Rolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
-    (hab : a < b)
-    (hcard : nodes.card = n + 1)
-    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
-    (hfc : ContinuousOn f (Icc a b))
-    (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
-    (zerof : ∀ x ∈ nodes, f x = 0)
-    : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
-
-  apply extRolle_F_weak n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
 
 /- Lagrange interpolation: given a finset `s : Finset ι`, a nodal map `v : ι → F` injective on
 `s` and a value function `r : ι → F`, `interpolate s v r` is the unique

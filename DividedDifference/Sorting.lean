@@ -3,6 +3,9 @@ import Mathlib.Tactic
 open Real Nat List
 
 /-
+This version is obsoleted, since Mathlib contains all the necessary
+sorting tools
+
  Let's try the James Oswald approach!
  With small adjustments to solve problems
 

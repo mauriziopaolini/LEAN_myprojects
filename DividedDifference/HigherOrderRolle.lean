@@ -257,7 +257,7 @@ theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
     (zerof : ∀ x ∈ nodes, f x = 0)
-    : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
     --: ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
   let lnodes : List ℝ := Finset.sort nodes
@@ -326,7 +326,7 @@ theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
     apply extRolle_L n hn_ne_0 hab hcard' hx0'' hxn'' h_ordered_nodes hfc hf zerof'
 
-  have hsame : Ioo (lnodes.getD 0 0) (lnodes.getD n 0) ⊆ intOfHullS nodes := by
+  have hsame : Ioo (lnodes.getD 0 0) (lnodes.getD n 0) ⊆ intOfHull nodes := by
     have nonempty0 : 0 < nodes.card := by grind
 
     have nonempty : nodes.Nonempty := by
@@ -337,7 +337,7 @@ theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
     clear hfc hf zerof zerof'
 
-    unfold intOfHullS
+    unfold intOfHull
 
     split_ifs
 
@@ -375,7 +375,7 @@ theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
   obtain ⟨c, hc⟩ := h_smaller
   obtain ⟨hc1, hc2⟩ := hc
 
-  have h_subset : c ∈ intOfHullS nodes := by
+  have h_subset : c ∈ intOfHull nodes := by
     --have hc1 : c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0) := by
     --  tauto
 
@@ -393,11 +393,11 @@ theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
     (zerof : ∀ x ∈ nodes, f x = 0)
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
-  have c_in_intOfHullS : ∃ c ∈ intOfHullS nodes, iteratedDeriv n f c = 0 := by
+  have c_in_intOfHullS : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
 
     apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
 
-  have hweaker : intOfHullS nodes ⊆ Ioo a b:= by
+  have hweaker : intOfHull nodes ⊆ Ioo a b:= by
     have nonempty0 : 0 < nodes.card := by grind
 
     have nonempty : nodes.Nonempty := by
@@ -408,7 +408,7 @@ theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
     clear hfc hf zerof
 
-    unfold intOfHullS
+    unfold intOfHull
     split_ifs
 
 
@@ -427,6 +427,10 @@ theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
   tauto
 
 
+/-
+The following two variants will be obsoleted: using unordered Lists is
+unnatural
+-/
 
 theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hcard : lnodes.length = n + 1)
@@ -435,7 +439,7 @@ theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n-1) f (Ioo a b))
     (zerof : ∀ x ∈ lnodes, f x = 0)
-    : ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
+    : ∃ c ∈ intOfHullL lnodes, iteratedDeriv n f c = 0 := by
 
   let lonodes := mysort lnodes
 
@@ -523,7 +527,7 @@ theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   have h_smaller : ∃ c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0), iteratedDeriv n f c = 0 := by
     apply extRolle_L n hn_ne_0 hab hcard_o hx0 hxn h_ordered_nodes hfc hf zerof'
 
-  have hsame : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ intOfHull lnodes := by
+  have hsame : Ioo (lonodes.getD 0 0) (lonodes.getD n 0) ⊆ intOfHullL lnodes := by
     have nonempty : 0 < lnodes.length := by grind
 
     let nmin := lnodes.minimum_of_length_pos nonempty
@@ -532,7 +536,7 @@ theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     --List.minimum_of_length_pos
     clear hfc hf zerof zerof'
 
-    unfold intOfHull
+    unfold intOfHullL
 
     split_ifs
 
@@ -564,7 +568,7 @@ theorem extRolle_unorderedL (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
   obtain ⟨c, hc⟩ := h_smaller
   obtain ⟨hc1, hc2⟩ := hc
 
-  have h_subset : c ∈ intOfHull lnodes := by
+  have h_subset : c ∈ intOfHullL lnodes := by
     --have hc1 : c ∈ Ioo (lonodes.getD 0 0) (lonodes.getD n 0) := by
     --  tauto
 
@@ -582,12 +586,12 @@ theorem extRolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
     (zerof : ∀ x ∈ lnodes, f x = 0)
     : ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
 
-  have c_in_intOfHull : ∃ c ∈ intOfHull lnodes, iteratedDeriv n f c = 0 := by
+  have c_in_intOfHull : ∃ c ∈ intOfHullL lnodes, iteratedDeriv n f c = 0 := by
 
     apply extRolle_unorderedL n hn_ne_0 hab hcard hx0 hxn h_distinct_nodes
         hfc hf zerof
 
-  have hweaker : intOfHull lnodes ⊆ Ioo a b:= by
+  have hweaker : intOfHullL lnodes ⊆ Ioo a b:= by
     have nonempty : 0 < lnodes.length := by grind
 
     let nmin := lnodes.minimum_of_length_pos nonempty
@@ -595,7 +599,7 @@ theorem extRolle_unorderedL_weak (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
     clear hfc hf zerof
 
-    unfold intOfHull
+    unfold intOfHullL
     split_ifs
     have nmin_in_lnodes : nmin ∈ lnodes := by
       exact List.minimum_of_length_pos_mem nonempty

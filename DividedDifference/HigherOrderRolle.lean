@@ -251,14 +251,20 @@ theorem extRolle_L {listnodes : List ℝ} (n:ℕ) (hn_ne_0 : n ≠ 0) (hab : a <
 variable {lnodes : List ℝ}
 
 theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
-    (hab : a < b)
     (hcard : nodes.card = n + 1)
-    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hab : a < b)
+    (nodesinab : ∀ x ∈ nodes, x ∈ Icc a b)
+    --(hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
     (zerof : ∀ x ∈ nodes, f x = 0)
     : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
-    --: ∃ c ∈ Ioo a b, iteratedDeriv n f c = 0 := by
+
+  have hx0 : ∀ x ∈ nodes, a ≤ x := by
+    simp_all only [ne_eq, mem_Icc, implies_true]
+
+  have hxn : ∀ x ∈ nodes, x ≤ b := by
+    simp_all only [ne_eq, mem_Icc, implies_true]
 
   let lnodes : List ℝ := Finset.sort nodes
 
@@ -385,9 +391,9 @@ theorem extRolle_F (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
 
 theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
-    (hab : a < b)
     (hcard : nodes.card = n + 1)
-    (hx0 : ∀ x ∈ nodes, a ≤ x) (hxn : ∀ x ∈ nodes, x ≤ b)
+    (hab : a < b)
+    (nodesinab : ∀ x ∈ nodes, x ∈ Icc a b)
     (hfc : ContinuousOn f (Icc a b))
     (hf : ContDiffOn ℝ (n - 1) f (Ioo a b))
     (zerof : ∀ x ∈ nodes, f x = 0)
@@ -395,7 +401,7 @@ theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
   have c_in_intOfHullS : ∃ c ∈ intOfHull nodes, iteratedDeriv n f c = 0 := by
 
-    apply extRolle_F n hn_ne_0 nodes hab hcard hx0 hxn hfc hf zerof
+    apply extRolle_F n hn_ne_0 nodes hcard hab nodesinab hfc hf zerof
 
   have hweaker : intOfHull nodes ⊆ Ioo a b:= by
     have nonempty0 : 0 < nodes.card := by grind
@@ -419,10 +425,16 @@ theorem extRolle_F_weak (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Finset ℝ)
 
     gcongr
 
+    have hx0 : ∀ x ∈ nodes, a ≤ x := by
+      simp_all only [ne_eq, mem_Icc, implies_true]
+
+    have hxn : ∀ x ∈ nodes, x ≤ b := by
+      simp_all only [ne_eq, mem_Icc, implies_true]
+
     exact (Finset.le_min'_iff nodes nonempty).mpr hx0
 
-    exact Finset.max'_le nodes nonempty b hxn
-
+    simp_all only [ne_eq, mem_Icc, lt_add_iff_pos_left, add_pos_iff, zero_lt_one, or_true, Finset.max'_le_iff,
+      implies_true]
 
   tauto
 

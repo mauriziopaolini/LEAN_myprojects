@@ -26,18 +26,28 @@ increasing order, then the resulting point c satisfies c ∈ ( x 0, x n )
 same as above, but the nodes are given as the elements of a List ℝ, still they
 are required to be given in increasing order
 
-- order_n_Rolle_unorderedL
+- order_n_Rolle_F
+
+The nodes are indicated as a Finset ℝ, hence they are unordered.  The resulting c is
+shown to belong to the interior of the Convex hull of the set of nodes.
+
+- order_n_Rolle_F_weak
+
+same as above, but the resulting c is only shown to belong to the open interval (a,b).
+This could be useful if one does not want to use the definition of
+"intOfHull" (the interior of the convex hull of the set of nodes) which might be
+inconvenient to manage.  Still of course the user can take a and b as the minimum
+and maximum of the nodes and still recovere the stronger result
+
+- order_n_Rolle_unorderedL (obsoleted)
 
 same as above, but the nodes are not required to be in increasing order.  Of course
 they must be mutually disjoint
 
-- order_n_Rolle_unorderedL_weak
+- order_n_Rolle_unorderedL_weak (obsoleted)
 
 weaker version of above, where the resulting point c is only guaranteed to
-be in (a,b).  This could be useful if one does not want to use the definition of
-"intOfHull" (the interior of the convex hull of the set of nodes) which might be
-inconvenient to manage.  Still of course the user can take a and b as the minimum
-and maximum of the nodes and still recovere the stronger result
+be in (a,b).
 -/
 
 /-

@@ -1,5 +1,6 @@
 import Mathlib.Order.Interval.Set.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.LinearAlgebra.Lagrange
 import Batteries.Tactic.GeneralizeProofs
 
 namespace Harmonic.GeneralizeProofs
@@ -231,7 +232,8 @@ lemma contdiffpol (n : ℕ) (p : Polynomial ℝ)
                   fun_prop
                 generalize_proofs at *;
                 simpa only [ Polynomial.eval_eq_sum_range ] using h_poly_analytic
-              exact?
+              --exact?
+              exact analyticOn_univ.mpr fun x a => h_poly_analytic x
             exact h_poly_analytic;
           exact fun p => by simpa using h_poly_analytic p |> AnalyticOn.contDiff;
         exact h_poly_cont_diff p
@@ -240,3 +242,52 @@ lemma contdiffpol (n : ℕ) (p : Polynomial ℝ)
     exact h_poly_cont_diff p;
   -- Since ⊤ is greater than or equal to any natural number n, if the function is ContDiffOn ℝ ⊤, then it's also ContDiffOn ℝ n.
   apply ContDiffOn.of_le; exact h_poly_cont_diff; exact le_top
+
+
+variable {p : Polynomial ℝ} {x : ℝ} {n : ℕ}
+
+theorem contdiffatpol : ContDiffAt ℝ n p.eval x := by
+  -- Since $p$ is a polynomial, it is infinitely differentiable, hence $ContDiffAt ℝ n (fun x => p.eval x) c$ for any $n$.
+  have h_poly_inf_diff : ∀ n : ℕ, ContDiff ℝ n (fun x => p.eval x) := by
+    -- Since $p$ is a polynomial, it is infinitely differentiable, hence $ContDiff ℝ n (fun x => p.eval x)$ for any $n$.
+    intro n
+    exact (by
+    -- Since polynomials are analytic, we can use the fact that Polynomial.eval p is analytic on ℝ.
+    have h_poly_analytic : AnalyticOn ℝ (fun x => p.eval x) Set.univ := by
+      have h_poly_analytic : ∀ x : ℝ, AnalyticAt ℝ (fun x => p.eval x) x := by
+        intro x
+        have h_poly_analytic : AnalyticAt ℝ (fun x => p.eval x) x := by
+          have h_poly_poly : ∀ x : ℝ, p.eval x = ∑ i ∈ p.support, p.coeff i * x ^ i := by
+            exact fun x => Polynomial.eval_eq_sum
+          simp +decide [ h_poly_poly ];
+          fun_prop (disch := norm_num)
+        exact h_poly_analytic
+      --exact?;
+      exact analyticOn_univ.mpr fun x a => h_poly_analytic x
+    exact h_poly_analytic.contDiff);
+  -- Since $p$ is a polynomial, it is infinitely differentiable, hence $ContDiff ℝ n (fun x => p.eval x)$ for any $n$.
+  apply (h_poly_inf_diff n).contDiffAt
+
+
+open Polynomial
+namespace Polynomial
+
+variable {p : ℝ[X]} {c : ℝ} {n : ℕ}
+
+theorem derivnisfactorial (hdegree : p.degree ≤ n)
+    : (derivative^[n] p).eval c = (Nat.factorial n)*(p.coeff n) := by
+  -- By definition of polynomial derivative, we know that $(derivative^[n] p)(c)$ is the $n$-th derivative of $p$ evaluated at $c$.
+  have h_deriv_eval : Polynomial.eval c (Polynomial.derivative^[n] p) = ∑ k ∈ Finset.range (n + 1), p.coeff k * (Nat.descFactorial k n) * c^(k - n) := by
+    simp +decide [ Polynomial.eval_eq_sum_range, Polynomial.coeff_iterate_derivative ];
+    -- Since $p$ is a polynomial of degree at most $n$, we have $\text{natDegree}(p) \leq n$, thus $\text{natDegree}(\text{derivative}^n p) = 0$.
+    have h_natDegree : Polynomial.natDegree (Polynomial.derivative^[n] p) ≤ 0 := by
+      have h_natDegree : Polynomial.natDegree (Polynomial.derivative^[n] p) ≤ Polynomial.natDegree p - n := by
+        exact natDegree_iterate_derivative p n
+      exact h_natDegree.trans ( Nat.sub_le_of_le_add <| by linarith [ Polynomial.natDegree_le_of_degree_le hdegree ] );
+    --simp_all +decide [ Polynomial.natDegree_mul', Finset.sum_range_succ ];
+    simp_all +decide [ Finset.sum_range_succ ];
+    --simp_all +decide [ mul_comm, Finset.sum_range, Nat.descFactorial_eq_zero_iff_lt ];
+    simp_all +decide [ mul_comm, Finset.sum_range ];
+    exact Finset.sum_eq_zero fun i hi => by rw [ Nat.descFactorial_eq_zero_iff_lt.mpr ( by linarith [ Fin.is_lt i ] ) ] ; ring;
+  simp_all +decide [ Finset.sum_range_succ, Nat.descFactorial_eq_factorial_mul_choose ];
+  simp +decide [ mul_comm, Finset.sum_range, Nat.choose_eq_zero_of_lt ]

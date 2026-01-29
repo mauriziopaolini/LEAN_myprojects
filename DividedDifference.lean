@@ -7,6 +7,7 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.LinearAlgebra.Lagrange
 import DividedDifference.HigherOrderRolle
 import DividedDifference.Polynomials
+import Mathlib.Analysis.Calculus.ContDiff.Polynomial
 
 import Batteries.Tactic.GeneralizeProofs
 
@@ -137,10 +138,13 @@ theorem divided_difference_eq_deriv_n (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Fin
   let p := Lagrange.interpolate nodes my_id f
   let E := f - p.eval
 
+  have hvs : Set.InjOn my_id nodes := by
+    exact Function.Injective.injOn fun ⦃a₁ a₂⦄ a => a
+
   have zeroE : ∀ x ∈ nodes, E x = 0 := by
     have hinterp : ∀ x ∈ nodes, p.eval x = f x := by
-      have hvs : Set.InjOn my_id nodes := by
-        exact Function.Injective.injOn fun ⦃a₁ a₂⦄ a => a
+      --have hvs : Set.InjOn my_id nodes := by
+      --  exact Function.Injective.injOn fun ⦃a₁ a₂⦄ a => a
 
       intro x hx
       apply Lagrange.eval_interpolate_at_node f hvs hx
@@ -192,14 +196,32 @@ theorem divided_difference_eq_deriv_n (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Fin
     exact ContDiffOn.contDiffAt hf ioo_is_neigh
 
   have contdiff_p : ContDiffAt ℝ n p.eval c := by
-    sorry
+    apply contdiffatpol
 
   have hderivs : (iteratedDeriv n f c) = (iteratedDeriv n E c) + (p_deriv_n c) := by
     --apply iteratedDeriv_add contdiff_f contdiff_p
     sorry
 
   have p_deriv_n_val : p_deriv_n c = (Nat.factorial n) * (divided_difference f nodes) := by
-    sorry
+    unfold divided_difference
+    have haddsum : n + 1 - 1 = n := by simp
+    rw [hcard, haddsum]
+    have p_deriv_n_is_coeff : p_deriv_n c = (Nat.factorial n)*(p.coeff n) := by
+      --apply derivnisfactorial
+      have pdegree : p.degree ≤ n := by
+        have n_eq_card_m_1 : n = nodes.card - 1 := by
+          grind
+        rw [n_eq_card_m_1]
+        exact Lagrange.degree_interpolate_le f hvs
+
+      have iscoefffactorial : (Polynomial.derivative^[n] p).coeff 0
+          = (Nat.factorial n)*(p.coeff n) := by
+
+        --apply Polynomial.coeff_iterate_derivative n p
+        sorry
+
+      sorry
+    rw [p_deriv_n_is_coeff]
 
   field_simp
   rw [hderivs,hc2,zero_add,p_deriv_n_val]

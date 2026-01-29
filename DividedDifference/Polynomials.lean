@@ -2,6 +2,7 @@ import Mathlib.Order.Interval.Set.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.LinearAlgebra.Lagrange
 import Batteries.Tactic.GeneralizeProofs
+import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 
 namespace Harmonic.GeneralizeProofs
 -- Harmonic `generalize_proofs` tactic
@@ -270,14 +271,11 @@ theorem contdiffatpol : ContDiffAt ℝ n p.eval x := by
 
 
 open Polynomial
-namespace Polynomial
-
-variable {p : ℝ[X]} {c : ℝ} {n : ℕ}
 
 theorem derivnisfactorial (hdegree : p.degree ≤ n)
-    : (derivative^[n] p).eval c = (Nat.factorial n)*(p.coeff n) := by
+    : (derivative^[n] p).eval x = (Nat.factorial n)*(p.coeff n) := by
   -- By definition of polynomial derivative, we know that $(derivative^[n] p)(c)$ is the $n$-th derivative of $p$ evaluated at $c$.
-  have h_deriv_eval : Polynomial.eval c (Polynomial.derivative^[n] p) = ∑ k ∈ Finset.range (n + 1), p.coeff k * (Nat.descFactorial k n) * c^(k - n) := by
+  have h_deriv_eval : Polynomial.eval x (Polynomial.derivative^[n] p) = ∑ k ∈ Finset.range (n + 1), p.coeff k * (Nat.descFactorial k n) * x^(k - n) := by
     simp +decide [ Polynomial.eval_eq_sum_range, Polynomial.coeff_iterate_derivative ];
     -- Since $p$ is a polynomial of degree at most $n$, we have $\text{natDegree}(p) \leq n$, thus $\text{natDegree}(\text{derivative}^n p) = 0$.
     have h_natDegree : Polynomial.natDegree (Polynomial.derivative^[n] p) ≤ 0 := by
@@ -291,3 +289,29 @@ theorem derivnisfactorial (hdegree : p.degree ≤ n)
     exact Finset.sum_eq_zero fun i hi => by rw [ Nat.descFactorial_eq_zero_iff_lt.mpr ( by linarith [ Fin.is_lt i ] ) ] ; ring;
   simp_all +decide [ Finset.sum_range_succ, Nat.descFactorial_eq_factorial_mul_choose ];
   simp +decide [ mul_comm, Finset.sum_range, Nat.choose_eq_zero_of_lt ]
+
+
+theorem polynomial_derivatives_as_function
+   : (Polynomial.derivative^[n] p).eval x = iteratedDeriv n p.eval x := by
+
+  induction hn:n generalizing x n
+  case zero =>
+    aesop
+  case succ m hm =>
+    have heqf : ((⇑derivative)^[m] p).eval = iteratedDeriv m (fun x => eval x p) := by
+      grind
+
+    let pdiff_alg := ((derivative)^[m] p)
+    let pdiff_fun := iteratedDeriv m (fun x => eval x p)
+
+    have heqdf : ((⇑derivative)^[m+1] p).eval = iteratedDeriv (m+1) (fun x => eval x p) := by
+      --specialize hm x
+      have hd1 : (derivative pdiff_alg).eval = deriv pdiff_fun := by
+
+        sorry
+      have h_alg : ((⇑derivative)^[m + 1] p) = derivative pdiff_alg := by
+        exact Function.iterate_succ_apply' (⇑derivative) m p
+      have h_fun : iteratedDeriv (m + 1) (fun x => eval x p) = deriv pdiff_fun := by
+        apply iteratedDeriv_succ
+      grind
+    grind

@@ -181,10 +181,27 @@ theorem divided_difference_eq_deriv_n (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Fin
 
   let p_deriv_n := iteratedDeriv n p.eval
 
+  have nodes_nonempty : nodes.Nonempty := by
+    have nodes_card_gt_0 : nodes.card > 0 := by
+      grind
+    exact Finset.card_pos.mp nodes_card_gt_0
+
   have c_in_ab : c ∈ (Ioo a b) := by
     unfold intOfHull at hc1
-
-    sorry
+    constructor
+    split_ifs at hc1
+    have minisnode : (nodes.min' nodes_nonempty) ∈ nodes := by
+      exact Finset.min'_mem nodes nodes_nonempty
+    have min_lt_c : (nodes.min' nodes_nonempty) < c := by
+      simp_all only [ne_eq, mem_Icc, continuousOn_neg_iff,
+        tsub_le_iff_right, self_le_add_right, mem_Ioo]
+    grind
+    have c_lt_max : c < (nodes.max' nodes_nonempty) := by
+      simp_all only [ne_eq, mem_Icc, continuousOn_neg_iff,
+        tsub_le_iff_right, self_le_add_right, ↓reduceDIte, mem_Ioo]
+    have maxisnode : (nodes.max' nodes_nonempty) ∈ nodes := by
+      exact Finset.max'_mem nodes nodes_nonempty
+    grind
 
   have contdiff_f : ContDiffAt ℝ n f c := by
     have isopen : IsOpen (Ioo a b) := by
@@ -198,29 +215,33 @@ theorem divided_difference_eq_deriv_n (n : ℕ) (hn_ne_0 : n ≠ 0) (nodes : Fin
   have contdiff_p : ContDiffAt ℝ n p.eval c := by
     apply contdiffatpol
 
+  have hderivs' : (iteratedDeriv n E c) = (iteratedDeriv n f c) - (p_deriv_n c) := by
+    apply iteratedDeriv_sub contdiff_f contdiff_p
+
   have hderivs : (iteratedDeriv n f c) = (iteratedDeriv n E c) + (p_deriv_n c) := by
-    --apply iteratedDeriv_add contdiff_f contdiff_p
-    sorry
+    grind
+
+  have pol_as_function : (Polynomial.derivative^[n] p).eval c = p_deriv_n c:= by
+    apply polynomial_derivatives_as_function
 
   have p_deriv_n_val : p_deriv_n c = (Nat.factorial n) * (divided_difference f nodes) := by
     unfold divided_difference
     have haddsum : n + 1 - 1 = n := by simp
     rw [hcard, haddsum]
     have p_deriv_n_is_coeff : p_deriv_n c = (Nat.factorial n)*(p.coeff n) := by
-      --apply derivnisfactorial
-      have pdegree : p.degree ≤ n := by
+
+      have pdegree : p.degree ≤ (n : ℕ) := by
         have n_eq_card_m_1 : n = nodes.card - 1 := by
           grind
         rw [n_eq_card_m_1]
         exact Lagrange.degree_interpolate_le f hvs
 
-      have iscoefffactorial : (Polynomial.derivative^[n] p).coeff 0
-          = (Nat.factorial n)*(p.coeff n) := by
+      have p_deriv_n_is_coeff' : (Polynomial.derivative^[n] p).eval c = (Nat.factorial n)*(p.coeff n) := by
+        exact derivnisfactorial pdegree
 
-        --apply Polynomial.coeff_iterate_derivative n p
-        sorry
+      rw [← pol_as_function]
+      gcongr
 
-      sorry
     rw [p_deriv_n_is_coeff]
 
   field_simp

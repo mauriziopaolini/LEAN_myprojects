@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.LinearAlgebra.Lagrange
 import Batteries.Tactic.GeneralizeProofs
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+import Mathlib.Analysis.Calculus.Deriv.Polynomial
 
 namespace Harmonic.GeneralizeProofs
 -- Harmonic `generalize_proofs` tactic
@@ -306,9 +307,12 @@ theorem polynomial_derivatives_as_function
 
     have heqdf : ((⇑derivative)^[m+1] p).eval = iteratedDeriv (m+1) (fun x => eval x p) := by
       --specialize hm x
-      have hd1 : (derivative pdiff_alg).eval = deriv pdiff_fun := by
-
-        sorry
+      --have hd1 : (derivative pdiff_alg).eval = deriv pdiff_fun := by
+      have hd1 : deriv pdiff_fun = (derivative pdiff_alg).eval := by
+        have heqf' : pdiff_alg.eval = pdiff_fun := by
+          gcongr
+        rw [← heqf']
+        bound
       have h_alg : ((⇑derivative)^[m + 1] p) = derivative pdiff_alg := by
         exact Function.iterate_succ_apply' (⇑derivative) m p
       have h_fun : iteratedDeriv (m + 1) (fun x => eval x p) = deriv pdiff_fun := by

@@ -54,6 +54,12 @@ weaker version of above, where the resulting point c is only guaranteed to
 be in (a,b).
 -/
 
+open BigOperators
+variable {nodes : Finset ℝ}
+def omega (nodes : Finset ℝ) := fun x => ∏ xi ∈ nodes, (x - xi)
+
+/- TODO: Newton formula for adding a new interpolation node -/
+
 /-
   nodes organized in a vector x : ℕ → ℝ
 -/

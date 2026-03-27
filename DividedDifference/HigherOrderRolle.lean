@@ -127,8 +127,9 @@ theorem order_n_Rolle_V (n : ℕ) (hn_ne_0 : n ≠ 0) (hab : a < b)
 
         have zerofp : ∀ k ≤ mm + 1, fp (y k) = 0 := by
           grind
-        have h_ordered_nodesy : ∀ k < mm+1, y k < y (k + 1) := by
+        have h_ordered_nodesy : ∀ k ≤ mm, y k < y (k + 1) := by
           grind
+
         specialize ih y0ltymm1 hy0 hfpc mm ffp' zerofp h_ordered_nodesy
         simp at ih
         grind

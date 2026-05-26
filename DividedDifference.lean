@@ -40,8 +40,8 @@ shown to belong to the interior of the Convex hull of the set of nodes.
 same as above, but the resulting c is only shown to belong to the open interval (a,b).
 This could be useful if one does not want to use the definition of
 "intOfHull" (the interior of the convex hull of the set of nodes) which might be
-inconvenient to manage.  Still of course the user can take a and b as the minimum
-and maximum of the nodes and still recovere the stronger result
+inconvenient to manage.  Of course the user can take a and b as the minimum
+and maximum of the nodes and still recover the stronger result
 
 - order_n_Rolle_unorderedL (obsoleted)
 

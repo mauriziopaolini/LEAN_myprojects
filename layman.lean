@@ -1,4 +1,14 @@
 /-
+  WHAT IS LEAN?
+  A modern, statically typed programming language and proof assistant.
+  It is used for both general-purpose programming and formal
+  mathematical verification.
+
+  Aggiungerei: E' una versione moderna dei "principia matematica" di
+  Whitehead e Russell, ma (molto) più umanamente maneggevole
+ -/
+
+/-
   Questo è un commento.  In LEAN è possibile utilizzare simboli
   matematici come
 
@@ -35,6 +45,16 @@ variable (x : ℝ) (n : ℕ)
   Spiegare 'example' vs 'theorem' vs 'lemma'
  -/
 
+
+example : x^2 - 3*x + 2 = 0 → x = 1 := by
+
+  sorry
+
+
+example : ¬ 1 = 2 := by
+  decide
+
+
 example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 
   sorry
@@ -66,17 +86,28 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 #eval (2:ℝ) - (3:ℝ)
 
 
+/-
+ Nel prossimo esempio non c'è verso di completare la dimostrazione...
+ Perché?
+ -/
 
 example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
+
   push_neg
   use 2
   constructor
   -- grind
   sorry
 
-  norm_num
+  decide
+
+/-
+ In effetti riusciamo a dimostrare la negazione
+ dell'affermazione precedente
+ -/
 
 example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
+
   norm_num
 
 
@@ -84,6 +115,13 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 #eval 4 - 6
 #eval (2:ℤ) - (3:ℤ)
 #eval (2:ℝ) - (3:ℝ)
+
+
+
+
+
+
+
 
 
 
@@ -104,10 +142,10 @@ Let S be the smallest set of positive integers such that
 Which positive integers are not in S?
  -/
 
-def isputnam (S : Set ℕ ) : Prop :=
+def isputnam (S : Set ℕ) : Prop :=
   (∀ n : ℕ, n^2 ∈ S → n ∈ S) ∧ (∀ n ∈ S, (n+5)^2 ∈ S)
 
-example : isputnam ∅ := by
+lemma emptyset_is_putnam : isputnam ∅ := by
   unfold isputnam
   exact ⟨fun n a => a, fun n a => a⟩
 
@@ -122,7 +160,7 @@ lemma S_target_is_putnam : (isputnam S_target) := by
   unfold S_target isputnam
   constructor
   intro n hn
-  have ngeq2 : 2 ≤ n := by
+  have h2leqn : 2 ≤ n := by
 
     have hnsq : 2 ≤ n^2 := by
       simp_all only [ge_iff_le, ne_eq, Set.mem_setOf_eq]

@@ -208,10 +208,7 @@ lemma S_target_is_putnam : (isputnam S_target) := by
   grind
 
 
-#check S_target
-
-example {r : ℕ} (n : ℕ) (hr : r = n % 5) : r ≤ 4 := by
-  sorry
+-- #check S_target
 
 
 lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈ S := by
@@ -224,6 +221,31 @@ lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈
 
   specialize hfirst nplus5
   tauto
+
+lemma nplusk5' {n m : ℕ} {S : Set ℕ} (h1 : isputnam S)
+    (h2 : n ∈ S) (h3 : m ≥ n) (h4 : (m-n) % 5 = 0)
+    : m ∈ S := by
+
+  let k := (m-n)/5
+  have hm : m = n + k*5 := by
+    omega
+
+  induction hk:k generalizing n k
+  case zero =>
+    rw [hk] at hm
+    have hmeqn : m = n := by
+      trivial
+
+    simp_all only [zero_mul, add_zero, ge_iff_le, le_refl, tsub_self, Nat.zero_mod]
+
+  case succ kk s =>
+    have hnplus5 : n + 5 ∈ S := by
+      exact nplus5 h1 h2
+
+    --rw [hm] at s
+    --specialize s hnplus5
+    --specialize s kk
+    sorry
 
 lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     ∀ k : ℕ, n + k*5 ∈ S := by
@@ -238,6 +260,116 @@ lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     specialize s nplus5
     specialize s kk
     grind
+
+/-
+  Dimostriamo che se S contiene un numero congruo a 4, allora contiene
+  anche un numero congruo a 1
+-/
+theorem putnam41 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 4)
+    : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
+
+  let k := n/5
+  let m := (n + 5)^2
+  have heuclid : n = 5*k + 4 := by
+    omega
+
+  have hsq : (n + 5)^2 ∈ S := by
+    unfold isputnam at hclosed
+    simp_all only [ge_iff_le]
+
+  have hsq1 : m % 5 = 1 := by
+    rw [heuclid] at hsq
+    grind
+
+  have hsq2 : m ≥ 2 := by
+    grind
+
+  use m
+
+
+/-
+  Dimostriamo che se S contiene un numero congruo a 2, allora contiene
+  anche un numero congruo a 1
+-/
+theorem putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 2)
+    : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
+
+  unfold isputnam at hclosed
+  let k := n/5
+  let m := (n + 5)^2
+  have heuclid : n = 5*k + 2 := by
+    omega
+
+  have hsq : (n + 5)^2 ∈ S := by
+    simp_all only [ge_iff_le]
+
+  have hsq1 : m % 5 = 4 := by
+    rw [heuclid] at hsq
+    grind
+
+  have hsq2 : m ≥ 2 := by
+    grind
+
+  have hm : m ∈ S ∧ m ≥ 2 ∧ m % 5 = 4 := by
+    trivial
+
+  apply putnam41 m hclosed hm
+
+
+/-
+  Dimostriamo che se S contiene un numero congruo a 3, allora contiene
+  anche un numero congruo a 1
+-/
+theorem putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 3)
+    : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
+
+  unfold isputnam at hclosed
+  let k := n/5
+  let m := (n + 5)^2
+  have heuclid : n = 5*k + 3 := by
+    omega
+
+  have hsq : (n + 5)^2 ∈ S := by
+    simp_all only [ge_iff_le]
+
+  have hsq1 : m % 5 = 4 := by
+    rw [heuclid] at hsq
+    grind
+
+  have hsq2 : m ≥ 2 := by
+    grind
+
+  have hm : m ∈ S ∧ m ≥ 2 ∧ m % 5 = 4 := by
+    trivial
+
+  apply putnam41 m hclosed hm
+
+
+
+theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ ¬ 5 ∣ n)
+    : S_target ⊆ S := by
+
+  unfold isputnam at hclosed
+  unfold S_target
+  let k := n/5
+  let r := n % 5
+  have heuclid : n = 5*k + r := by
+    exact Eq.symm (Nat.div_add_mod n 5)
+  have hrlt6 : r < 5 := by
+    omega
+
+  by_cases hr0 : r = 0
+  grind
+  by_cases hr1 : r = 1
+  sorry
+  by_cases hr2 : r = 2
+  sorry
+  by_cases hr3 : r = 3
+  sorry
+  by_cases hr4 : r = 4
+  sorry
+
+  grind
 
 
 theorem putnam0 {S : Set ℕ}

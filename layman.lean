@@ -222,7 +222,7 @@ lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈
   specialize hfirst nplus5
   tauto
 
-lemma nplusk5' {n m : ℕ} {S : Set ℕ} (h1 : isputnam S)
+lemma nplusk5'' {n m : ℕ} {S : Set ℕ} (h1 : isputnam S)
     (h2 : n ∈ S) (h3 : m ≥ n) (h4 : (m-n) % 5 = 0)
     : m ∈ S := by
 
@@ -261,10 +261,16 @@ lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     specialize s kk
     grind
 
+lemma nplusk5' {n : ℕ} {S : Set ℕ} {k : ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
+    n + k*5 ∈ S := by
+
+  exact nplusk5 h1 h2 k
+
 /-
   Dimostriamo che se S contiene un numero congruo a 4, allora contiene
   anche un numero congruo a 1
 -/
+
 theorem putnam41 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 4)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
 
@@ -344,15 +350,27 @@ theorem putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
 
   apply putnam41 m hclosed hm
 
+lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
+  let nm2 := n - 2
+  have hnx : n = nm2 + 2 := by grind
+
+  have hnm1 : nm2 + 1 ≥ 1 := by
+    norm_num
+
+  have hhn : (nm2+2)*(nm2+1) ≥ 2 := by
+    exact Nat.le_of_ble_eq_true rfl
+
+  rw [hnx]
+  grind
 
 /-
   Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
   S contiene m
 -/
-theorem putnam11 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
-    : ∀ m : ℕ, m ≥ 2 → m % 5 = 1 → m ∈ S := by
+theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
+    (hm : m ≥ 2) (hm2 : m % 5 = 1) : m ∈ S := by
 
-  intro m hm hm2
+  --intro m hm hm2
   obtain ⟨hn1, hn2, hn3⟩ := hn
 
   -- unfold isputnam at hclosed
@@ -361,12 +379,50 @@ theorem putnam11 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
   have hm1 : m = n + k*5 := by
     omega
 
-  -- apply nplusk5
+  have hhh : n + k*5 ∈ S := by
+    exact nplusk5 hclosed hn1 k
 
-  sorry
+  rw [hm1]
+  trivial
 
-  sorry
+  let msq := m^2
 
+  have hmsq : msq % 5 = 1 := by
+
+    let k := m / 5
+    have hm3 : m = k*5 + 1 := by
+      omega
+
+    show m^2 % 5 = 1
+    rw [hm3]
+    grind
+
+  have hmsqincr : m^2 ≥ m + 2 := by
+    exact nsqincreasing m hm
+
+  have hmsq0 : m^2 ≥ 2 := by
+    grind
+
+  have hmsqinS : msq ∈ S := by
+    have hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1 := by
+      trivial
+
+    have hsqincreasing : msq > m := by
+      grind
+
+    have hdecr : n - msq < n - m := by
+      grind
+
+    have hngtm : n > m := by
+      grind
+
+    let newdelta := n - m^2
+    --apply putnam11 hclosed hn hmsq0 hmsq termination_by n -
+    apply putnam11 hclosed hn hmsq0 hmsq
+    --sorry
+
+  unfold isputnam at hclosed
+  tauto
 
 
 

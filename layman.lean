@@ -345,6 +345,30 @@ theorem putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
   apply putnam41 m hclosed hm
 
 
+/-
+  Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
+  S contiene m
+-/
+theorem putnam11 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
+    : ∀ m : ℕ, m ≥ 2 → m % 5 = 1 → m ∈ S := by
+
+  intro m hm hm2
+  obtain ⟨hn1, hn2, hn3⟩ := hn
+
+  -- unfold isputnam at hclosed
+  by_cases hm0 : m ≥ n
+  let k := (m-n)/5
+  have hm1 : m = n + k*5 := by
+    omega
+
+  -- apply nplusk5
+
+  sorry
+
+  sorry
+
+
+
 
 theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ ¬ 5 ∣ n)
     : S_target ⊆ S := by

@@ -28,8 +28,9 @@
   una parte della libreria 'mathlib', un 'corpus' di matematica
   verificata con LEAN e sviluppato dalla community
   -/
-import Mathlib.Data.Nat.Prime.Defs
-import Mathlib.Data.Real.Basic
+import Mathlib
+--import Mathlib.Data.Nat.Prime.Defs
+--import Mathlib.Data.Real.Basic
 
 /-
   Vogliamo che da qui in avanti x sia un numero reale e n sia
@@ -77,7 +78,6 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 
   -- norm_num
 
-/- trabocchetti... -/
 
 
 
@@ -96,6 +96,9 @@ example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
   decide
 
+
+
+
 /-
  In effetti riusciamo a dimostrare la negazione
  dell'affermazione precedente
@@ -105,6 +108,12 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
   norm_num
 
+
+
+
+/- trabocchetti... -/
+
+/-
 #check 2 - 3
 #eval 2 - 3
 #eval (2:ℤ) - (3:ℤ)
@@ -115,7 +124,7 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 #eval (2:ℤ) - (3:ℤ)
 #eval 2^2 + 2 - 3*2
 --#eval (2:ℝ) - (3:ℝ)
-
+ -/
 
 
 
@@ -239,10 +248,12 @@ lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     specialize s kk
     grind
 
+/-
 lemma nplusk5' {n : ℕ} {S : Set ℕ} {k : ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     n + k*5 ∈ S := by
 
   exact nplusk5 h1 h2 k
+ -/
 
 /-
   Dimostriamo che se S contiene un numero congruo a 4, allora contiene
@@ -272,9 +283,11 @@ lemma putnam41 {S : Set ℕ} (hclosed : isputnam S)
   use m
 
 
+
+
 /-
   Dimostriamo che se S contiene un numero congruo a 2, allora contiene
-  anche un numero congruo a 1
+  anche un numero congruo a 1 (mod 5)
 -/
 lemma putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 2)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
@@ -347,6 +360,8 @@ lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
 /- ================================================================= -/
 /- XXXXXXXXXXXX hic sunt leones XXXXXXXXXX -/
 
+/-
+
 def mysq (n k : ℕ) : ℕ :=
   if k = 0 then
     n
@@ -369,6 +384,8 @@ def isintower (n m : ℕ) : Prop :=
 
 
 --#eval isintower 2 4
+ -/
+
 
 lemma putnam11pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
@@ -492,12 +509,126 @@ theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
 
 
 /-
+  Dimostriamo che se S contiene un numero non congruo a 0, allora per ogni m ≥ 2 congruo a 1
+  S contiene m
+-/
+theorem putnam1x {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
+    (hm : m ≥ 2) (hm2 : m % 5 = 1)
+    : m ∈ S := by
 
-theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ ¬ 5 ∣ n)
+  let r := n % 5
+  let k := n / 5
+  have hne : n = k*5 + r := by
+    exact Eq.symm (Nat.div_add_mod' n 5)
+
+
+  by_cases hr0 : r = 0
+  grind
+
+
+  by_cases hr1 : r = 1
+  have hn' : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1 := by
+    tauto
+  apply putnam11 hclosed hn' hm hm2
+
+
+  by_cases hr4 : r = 4
+  let nsq := (n+5)^2
+  have hnsq2 : (n+5)^2 % 5 = 1 := by
+    rw [hne]
+    grind
+
+  have hnsq : nsq ∈ S ∧ nsq ≥ 2 ∧ nsq % 5 = 1 := by
+    constructor
+    unfold isputnam at hclosed
+    show (n + 5)^2 ∈ S
+    obtain ⟨hclosed1, hclosed2⟩ := hclosed
+    specialize hclosed2 n
+    obtain ⟨hn1, hn2, hn3⟩ := hn
+    tauto
+
+    constructor
+    show (n + 5)^2 ≥ 2
+    grind
+
+    show (n+5)^2 % 5 = 1
+    gcongr
+
+
+  apply putnam11 hclosed hnsq hm hm2
+
+
+  by_cases hr23 : r = 2 ∨ r = 3
+  have hnsq : (n+5)^2 % 5 = 4 := by
+    by_cases hr2 : r = 2
+    rw [hne]
+    rw [hr2]
+    grind
+
+    have hr3 : r = 3 := by
+      simp_all only [ge_iff_le, Nat.mul_add_mod_self_right, ne_eq, false_or, Nat.succ_ne_self, not_false_eq_true]
+
+    rw [hne]
+    rw [hr3]
+    grind
+
+  have hnsqsq : ((n+5)^2 + 5)^2 % 5 = 1 := by
+    let nsq5 := (n+5)^2
+    show (nsq5 + 5)^2 % 5 = 1
+    have hnsq5 : nsq5 % 5 = 4 := by
+      gcongr
+    have hnsq5plus : (nsq5 + 5) % 5 = 4 := by
+      simp_all only [ge_iff_le, Nat.mul_add_mod_self_right, ne_eq, Nat.add_mod_right]
+    let kk := (nsq5 + 5)/5
+    have hnsqe : nsq5 + 5 = 5*kk + 4 := by
+      grind
+    rw [hnsqe]
+    grind
+
+  let nsqsq := ((n + 5)^2 + 5)^2
+  have hnsqsq' : nsqsq ∈ S ∧ nsqsq ≥ 2 ∧ nsqsq % 5 = 1 := by
+    constructor
+    unfold isputnam at hclosed
+    show ((n + 5)^2 + 5)^2 ∈ S
+    obtain ⟨hclosed1, hclosed2⟩ := hclosed
+    obtain ⟨hn1, hn2, hn3⟩ := hn
+    have hmiddle : (n + 5)^2 ∈ S := by
+      simp_all only [ge_iff_le, Nat.mul_add_mod_self_right, ne_eq]
+
+    specialize hclosed2 ((n + 5)^2)
+    tauto
+
+    constructor
+    grind
+
+    gcongr
+
+
+  apply putnam11 hclosed hnsqsq' hm hm2
+
+  omega
+
+
+
+
+
+
+theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
     : S_target ⊆ S := by
 
   unfold isputnam at hclosed
-  unfold S_target
+  intro m
+  by_cases hnot : m ∉ S_target
+  tauto
+
+  have hminStarget : m ∈ S_target := by
+    simp_all only [ge_iff_le, ne_eq, not_not]
+
+  clear hnot
+  -- XXXXXX
+  unfold S_target at hminStarget
   let k := n/5
   let r := n % 5
   have heuclid : n = 5*k + r := by

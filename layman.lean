@@ -91,10 +91,15 @@ example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
   push_neg
   use 2
   constructor
+  swap
+  norm_num
+
   -- grind
   sorry
 
-  decide
+
+
+
 
 
 
@@ -113,18 +118,13 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
 /- trabocchetti... -/
 
-/-
-#check 2 - 3
-#eval 2 - 3
-#eval (2:ℤ) - (3:ℤ)
-#eval (2:ℝ) - (3:ℝ)
+--#eval 2^2 - 3*2 + 2
 
-#eval 2^2 - 3*2 + 2
-#eval 4 - 6
-#eval (2:ℤ) - (3:ℤ)
-#eval 2^2 + 2 - 3*2
+--#check 2^2 - 3*2
+--#eval 2^2 - 3*2
+--#eval (2:ℤ)^2 - (3:ℤ)*2
 --#eval (2:ℝ) - (3:ℝ)
- -/
+
 
 
 
@@ -156,7 +156,7 @@ def isputnam (S : Set ℕ) : Prop :=
 
 lemma emptyset_is_putnam : isputnam ∅ := by
   unfold isputnam
-  exact ⟨fun n a => a, fun n a => a⟩
+  norm_num
 
 example : isputnam (Set.univ : Set ℕ) := by
   unfold isputnam
@@ -176,8 +176,7 @@ lemma S_target_is_putnam : (isputnam S_target) := by
 
     by_contra hcontra
     have hnlt2 : n < 2 := by
-      simp_all only
-       [ge_iff_le, ne_eq, Set.mem_setOf_eq, true_and, not_le]
+      simp_all only [ge_iff_le, ne_eq, Set.mem_setOf_eq, true_and, not_le]
 
     have hneq0or1 : n = 0 ∨ n = 1 := by
       omega
@@ -220,6 +219,8 @@ lemma S_target_is_putnam : (isputnam S_target) := by
 -- #check S_target
 
 
+/- ================================================== -/
+
 lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈ S := by
   let nplus5 := n+5
   let m := (nplus5)^2
@@ -230,7 +231,6 @@ lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈
 
   specialize hfirst nplus5
   tauto
-
 
 /- ================================================== -/
 
@@ -248,18 +248,11 @@ lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     specialize s kk
     grind
 
-/-
-lemma nplusk5' {n : ℕ} {S : Set ℕ} {k : ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
-    n + k*5 ∈ S := by
-
-  exact nplusk5 h1 h2 k
- -/
 
 /-
   Dimostriamo che se S contiene un numero congruo a 4, allora contiene
-  anche un numero congruo a 1
+  anche un numero congruo a 1 (mod 5)
 -/
-
 lemma putnam41 {S : Set ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 4)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
@@ -284,6 +277,7 @@ lemma putnam41 {S : Set ℕ} (hclosed : isputnam S)
 
 
 
+/- ================================================== -/
 
 /-
   Dimostriamo che se S contiene un numero congruo a 2, allora contiene
@@ -313,6 +307,9 @@ lemma putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 �
 
   apply putnam41 m hclosed hm
 
+
+
+/- ================================================== -/
 
 /-
   Dimostriamo che se S contiene un numero congruo a 3, allora contiene
@@ -358,34 +355,12 @@ lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
   grind
 
 /- ================================================================= -/
-/- XXXXXXXXXXXX hic sunt leones XXXXXXXXXX -/
 
 /-
-
-def mysq (n k : ℕ) : ℕ :=
-  if k = 0 then
-    n
-  else if k = 1 then
-    n*n
-  else
-    mysq (n*n) (k-1)
-
-
-def isintower (n m : ℕ) : Prop :=
-  if m < n then
-    false
-  else if m = n then
-    true
-  else if m = (n*n) then
-    true
-  else
-    false
-    --isintower (n*n) m
-
-
---#eval isintower 2 4
+ ====> WOW!  Questo è il mio primo teorema RICORSIVO <====
+ Dimostriamo che se n ∈ S, congruo a 1 (mod 5) e m è anch'esso congruo a 1 (mod 5)
+ con 2 ≤ m < n, allora anche m ∈ S
  -/
-
 
 lemma putnam11pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
@@ -454,20 +429,24 @@ lemma putnam11pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
       omega
     rw [hhhh]
 
+    /- l'ipotesi che segue non sembra essere necessaria
+       ma se proviamo a rimuoverla...
+    -/
     have hdeltadecr : newdelta < delta := by
       omega
-
+    --clear hdeltadecr
     apply putnam11pre hclosed hn hnewdelta hnewdelta0 hnewdelta1
 
   unfold isputnam at hclosed
   tauto
 
+/- ================================================================= -/
 
 /-
   Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
   S contiene m
 -/
-theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+theorem putnam_11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
     (hm : m ≥ 2) (hm2 : m % 5 = 1) : m ∈ S := by
 
@@ -507,12 +486,13 @@ theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
 
 
 
+/- ================================================================= -/
 
 /-
-  Dimostriamo che se S contiene un numero non congruo a 0, allora per ogni m ≥ 2 congruo a 1
-  S contiene m
+  Dimostriamo che se S contiene un numero non congruo a 0, allora per ogni m ≥ 2
+  congruo a 1, m ∈ S
 -/
-theorem putnam1x {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+theorem putnam_n1 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
     (hm : m ≥ 2) (hm2 : m % 5 = 1)
     : m ∈ S := by
@@ -530,7 +510,7 @@ theorem putnam1x {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
   by_cases hr1 : r = 1
   have hn' : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1 := by
     tauto
-  apply putnam11 hclosed hn' hm hm2
+  apply putnam_11 hclosed hn' hm hm2
 
 
   by_cases hr4 : r = 4
@@ -556,7 +536,7 @@ theorem putnam1x {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     gcongr
 
 
-  apply putnam11 hclosed hnsq hm hm2
+  apply putnam_11 hclosed hnsq hm hm2
 
 
   by_cases hr23 : r = 2 ∨ r = 3
@@ -605,14 +585,37 @@ theorem putnam1x {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     gcongr
 
 
-  apply putnam11 hclosed hnsqsq' hm hm2
+  apply putnam_11 hclosed hnsqsq' hm hm2
 
   omega
 
 
+/- ================================================================= -/
+
+/-
+  Dimostriamo che se S contiene un numero NON congruo a 0, allora per ogni m ≥ 2
+  NON congruo a 0, m ∈ S
+-/
+theorem putnam_nm {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
+    (hm : m ≥ 2) (hm2 : m % 5 ≠ 0)
+    : m ∈ S := by
+
+  sorry
 
 
 
+/- ================================================================= -/
+
+/-
+  Per concludere come corollario dimostriamo che non ci sono insiemi "isputnam"
+  stramente intermedi tra ∅ e S_target
+
+                           TODO
+
+-/
+
+/-
 
 theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)

@@ -51,8 +51,7 @@ example : x^2 - 3*x + 2 = 0 → x = 1 := by
   sorry
 
 
-example : ¬ 1 = 2 := by
-  decide
+
 
 
 example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
@@ -80,10 +79,6 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 
 /- trabocchetti... -/
 
-#check 2 - 3
-#eval 2 - 3
-#eval (2:ℤ) - (3:ℤ)
-#eval (2:ℝ) - (3:ℝ)
 
 
 /-
@@ -110,11 +105,16 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
   norm_num
 
+#check 2 - 3
+#eval 2 - 3
+#eval (2:ℤ) - (3:ℤ)
+#eval (2:ℝ) - (3:ℝ)
 
 #eval 2^2 - 3*2 + 2
 #eval 4 - 6
 #eval (2:ℤ) - (3:ℤ)
-#eval (2:ℝ) - (3:ℝ)
+#eval 2^2 + 2 - 3*2
+--#eval (2:ℝ) - (3:ℝ)
 
 
 
@@ -222,30 +222,8 @@ lemma nplus5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) : (n+5)∈
   specialize hfirst nplus5
   tauto
 
-lemma nplusk5'' {n m : ℕ} {S : Set ℕ} (h1 : isputnam S)
-    (h2 : n ∈ S) (h3 : m ≥ n) (h4 : (m-n) % 5 = 0)
-    : m ∈ S := by
 
-  let k := (m-n)/5
-  have hm : m = n + k*5 := by
-    omega
-
-  induction hk:k generalizing n k
-  case zero =>
-    rw [hk] at hm
-    have hmeqn : m = n := by
-      trivial
-
-    simp_all only [zero_mul, add_zero, ge_iff_le, le_refl, tsub_self, Nat.zero_mod]
-
-  case succ kk s =>
-    have hnplus5 : n + 5 ∈ S := by
-      exact nplus5 h1 h2
-
-    --rw [hm] at s
-    --specialize s hnplus5
-    --specialize s kk
-    sorry
+/- ================================================== -/
 
 lemma nplusk5 {n : ℕ} {S : Set ℕ} (h1 : isputnam S) (h2 : n ∈ S) :
     ∀ k : ℕ, n + k*5 ∈ S := by
@@ -271,7 +249,8 @@ lemma nplusk5' {n : ℕ} {S : Set ℕ} {k : ℕ} (h1 : isputnam S) (h2 : n ∈ S
   anche un numero congruo a 1
 -/
 
-theorem putnam41 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 4)
+lemma putnam41 {S : Set ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 4)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
 
   let k := n/5
@@ -297,7 +276,7 @@ theorem putnam41 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
   Dimostriamo che se S contiene un numero congruo a 2, allora contiene
   anche un numero congruo a 1
 -/
-theorem putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 2)
+lemma putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 2)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
 
   unfold isputnam at hclosed
@@ -326,7 +305,7 @@ theorem putnam21 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
   Dimostriamo che se S contiene un numero congruo a 3, allora contiene
   anche un numero congruo a 1
 -/
-theorem putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 3)
+lemma putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 3)
     : ∃ m, m ≥ 2 ∧ m % 5 = 1 := by
 
   unfold isputnam at hclosed
@@ -350,6 +329,8 @@ theorem putnam31 {S : Set ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 
 
   apply putnam41 m hclosed hm
 
+/- ================================================================= -/
+
 lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
   let nm2 := n - 2
   have hnx : n = nm2 + 2 := by grind
@@ -363,27 +344,43 @@ lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
   rw [hnx]
   grind
 
-/-
-  Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
-  S contiene m
--/
-theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
-    (hm : m ≥ 2) (hm2 : m % 5 = 1) : m ∈ S := by
+/- ================================================================= -/
+/- XXXXXXXXXXXX hic sunt leones XXXXXXXXXX -/
 
-  --intro m hm hm2
-  obtain ⟨hn1, hn2, hn3⟩ := hn
+def mysq (n k : ℕ) : ℕ :=
+  if k = 0 then
+    n
+  else if k = 1 then
+    n*n
+  else
+    mysq (n*n) (k-1)
 
-  -- unfold isputnam at hclosed
-  by_cases hm0 : m ≥ n
-  let k := (m-n)/5
-  have hm1 : m = n + k*5 := by
+
+def isintower (n m : ℕ) : Prop :=
+  if m < n then
+    false
+  else if m = n then
+    true
+  else if m = (n*n) then
+    true
+  else
+    false
+    --isintower (n*n) m
+
+
+--#eval isintower 2 4
+
+lemma putnam11pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
+    (hdelta : delta > 0) (hdelta0 : delta ≤ n-2) (hdelta1 : 5 ∣ delta)
+    : n-delta ∈ S := by
+
+  let m := n - delta
+  let k := (n-m)/5
+  have hm0 : m ≥ 2 := by
+    grind
+  have hm1 : n = m + k*5 := by
     omega
-
-  have hhh : n + k*5 ∈ S := by
-    exact nplusk5 hclosed hn1 k
-
-  rw [hm1]
-  trivial
 
   let msq := m^2
 
@@ -398,12 +395,24 @@ theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S) (hn : n ∈ S 
     grind
 
   have hmsqincr : m^2 ≥ m + 2 := by
-    exact nsqincreasing m hm
+    exact nsqincreasing m hm0
 
   have hmsq0 : m^2 ≥ 2 := by
     grind
 
   have hmsqinS : msq ∈ S := by
+    obtain ⟨hn1, hn2, hn3⟩ := hn
+    by_cases hsimple : msq ≥ n
+    let k := (msq-n)/5
+    have hmsq1 : msq = n + k*5 := by
+      omega
+
+    have hhh : n + k*5 ∈ S := by
+      exact nplusk5 hclosed hn1 k
+
+    rw [hmsq1]
+    trivial
+
     have hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1 := by
       trivial
 
@@ -416,15 +425,73 @@ theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S) (hn : n ∈ S 
     have hngtm : n > m := by
       grind
 
-    let newdelta := n - m^2
-    --apply putnam11 hclosed hn hmsq0 hmsq termination_by n -
-    apply putnam11 hclosed hn hmsq0 hmsq
-    --sorry
+    let newdelta := n - msq
+    have hnewdelta : newdelta > 0 := by
+      exact tsub_pos_iff_not_le.mpr hsimple
+    have hnewdelta0 : newdelta ≤ n - 2 := by
+      exact Nat.sub_le_sub_left hmsq0 n
+    have hnewdelta1 : 5 ∣ newdelta := by
+      omega
+
+    have hhhh : msq = n - newdelta := by
+      omega
+    rw [hhhh]
+
+    have hdeltadecr : newdelta < delta := by
+      omega
+
+    apply putnam11pre hclosed hn hnewdelta hnewdelta0 hnewdelta1
 
   unfold isputnam at hclosed
   tauto
 
 
+/-
+  Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
+  S contiene m
+-/
+theorem putnam11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
+    (hm : m ≥ 2) (hm2 : m % 5 = 1) : m ∈ S := by
+
+  have hn1 : n ∈ S := by
+    simp_all only [ge_iff_le]
+  have hn2 : n ≥ 2 := by
+    simp_all only [ge_iff_le, true_and]
+  have hn3 : n % 5 = 1 := by
+    simp_all only [ge_iff_le, true_and]
+  --obtain ⟨hn1, hn2, hn3⟩ := hn
+  by_cases htriv : m ≥ n
+  let k := (m-n)/5
+  have hm1 : m = n + k*5 := by
+    omega
+
+  have hhh : n + k*5 ∈ S := by
+    exact nplusk5 hclosed hn1 k
+
+  rw [hm1]
+  trivial
+
+  let delta := n-m
+
+  have hdelta0 : delta ≤ n - 2 := by
+    grind
+
+  have hdelta1 : 5 ∣ delta := by
+    omega
+
+  have hhhh : m = n - delta := by
+    omega
+  rw [hhhh]
+
+  have hdelta : delta > 0 := by
+    simp_all only [ge_iff_le, and_self, not_le, tsub_lt_self_iff, gt_iff_lt]
+  apply putnam11pre hclosed hn hdelta hdelta0 hdelta1
+
+
+
+
+/-
 
 theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ n ≥ 2 ∧ ¬ 5 ∣ n)
     : S_target ⊆ S := by
@@ -451,6 +518,9 @@ theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S) (hn : n ∈ S ∧ 
 
   grind
 
+ -/
+
+ /-
 
 theorem putnam0 {S : Set ℕ}
               (hclosed : isputnam S)
@@ -458,3 +528,5 @@ theorem putnam0 {S : Set ℕ}
               7 ∈ S := by
 
   exact nplus5 hclosed htwo
+
+ -/

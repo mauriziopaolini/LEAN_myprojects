@@ -157,9 +157,66 @@ lemma emptyset_is_putnam : isputnam ∅ := by
   unfold isputnam
   norm_num
 
-example : isputnam (Set.univ : Set ℕ) := by
+lemma univ_is_putnam : isputnam (Set.univ : Set ℕ) := by
   unfold isputnam
   norm_num
+
+/-
+ NOTA: questo teorema non serve per risolvere il problema, ma mostra
+ che viene definita una topologia per cui gli insiemi "isputnam" sono
+ i chiusi
+
+ Dimostriamo che gli insiemi "isputnam" sono chiusi rispetto
+ all'intersezione
+-/
+
+open Set
+
+theorem intersection_isputnam {I : Type*} (SS : I → Set ℕ)
+    (h_inter : ∀ i : I, isputnam (SS i))
+    : isputnam (⋂ i, SS i) := by
+
+  unfold isputnam
+  constructor
+  intro n
+  intro hS
+
+  have hi : ∀ i, (n^2) ∈ SS i := by
+    simp_all only [mem_iInter, implies_true]
+
+  unfold isputnam at h_inter
+
+  have hi1 : ∀ i, n ∈ SS i := by
+    intro i
+    have h_inter_dup := h_inter
+    specialize h_inter_dup i
+    obtain ⟨h_inter1, h_inter2⟩ := h_inter_dup
+    specialize hi i
+    specialize h_inter1 n
+    specialize h_inter1 hi
+    exact h_inter1
+
+  simp_all only [mem_iInter, implies_true]
+
+  unfold isputnam at h_inter
+  intro n hS
+
+  have hi : ∀ i, n ∈ SS i := by
+    simp_all only [mem_iInter, implies_true]
+
+  have hi1 : ∀ i, (n+5)^2 ∈ SS i := by
+    intro i
+    specialize h_inter i
+    obtain ⟨h_inter1, h_inter2⟩ := h_inter
+    specialize hi i
+    specialize h_inter2 n
+    specialize h_inter2 hi
+    exact h_inter2
+
+  simp_all only [mem_iInter, implies_true]
+
+
+
 
 def S_target : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 ≠ 0)}
 

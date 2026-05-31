@@ -29,8 +29,6 @@
   verificata con LEAN e sviluppato dalla community
   -/
 import Mathlib
---import Mathlib.Data.Nat.Prime.Defs
---import Mathlib.Data.Real.Basic
 
 /-
   Vogliamo che da qui in avanti x sia un numero reale e n sia
@@ -69,14 +67,15 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 
 
 
+  --push_neg
+  --use 2
+  --clear x
+  --constructor
+  --swap
+  --norm_num
 
-  -- push_neg
-  -- use 2
-  -- clear x
-  -- constructor
-  -- grind
+  --grind
 
-  -- norm_num
 
 
 
@@ -86,7 +85,7 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
  Perché?
  -/
 
-example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
+example : ¬ ∀ n, (3 - 3*n + n^2 = 1 → n = 1) := by
 
   push_neg
   use 2
@@ -110,8 +109,8 @@ example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
  -/
 
 example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
-
   norm_num
+
 
 
 
@@ -443,10 +442,11 @@ lemma putnam11pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
 /- ================================================================= -/
 
 /-
-  Dimostriamo che se S contiene un numero congruo a 1, allora per ogni m ≥ 2 congruo a 1
+  Dimostriamo che se S contiene un numero congruo a 1, allora
+  ∀ m ≥ 2 congruo a 1
   S contiene m
 -/
-theorem putnam_11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+lemma putnam_11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 1)
     (hm : m ≥ 2) (hm2 : m % 5 = 1) : m ∈ S := by
 
@@ -492,7 +492,7 @@ theorem putnam_11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
   Dimostriamo che se S contiene un numero non congruo a 0, allora per ogni m ≥ 2
   congruo a 1, m ∈ S
 -/
-theorem putnam_n1 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+lemma putnam_n1 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
     (hm : m ≥ 2) (hm2 : m % 5 = 1)
     : m ∈ S := by
@@ -593,15 +593,97 @@ theorem putnam_n1 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
 /- ================================================================= -/
 
 /-
-  Dimostriamo che se S contiene un numero NON congruo a 0, allora per ogni m ≥ 2
-  NON congruo a 0, m ∈ S
+  Dimostriamo che se S contiene un numero NON congruo a 0, allora
+  ∀ m ≥ 2 NON congruo a 0 → m ∈ S
 -/
 theorem putnam_nm {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
     (hm : m ≥ 2) (hm2 : m % 5 ≠ 0)
     : m ∈ S := by
 
-  sorry
+  let six := 6
+  have hsix0 : six ≥ 2 := by decide
+  have hsix1 : six % 5 = 1 := by decide
+  have hsix : six ∈ S := by
+    apply putnam_n1 hclosed hn hsix0 hsix1
+
+  have hsix01 : six ∈ S ∧ six ≥ 2 ∧ six % 5 = 1 := by
+    trivial
+
+  by_cases hr1 : m % 5 = 1
+  apply putnam_11 hclosed hsix01 hm hr1
+
+  let msq := m^2
+  by_cases hr4 : m % 5 = 4
+
+  have hmsqinS : m^2 ∈ S := by
+    have hmsq : m^2 ≥ 2 := by
+      have hmsq' : m^2 ≥ m + 2 := by
+        apply nsqincreasing m hm
+      exact Nat.le_of_add_left_le hmsq'
+    have hmsq1 : m^2 % 5 = 1 := by
+      let k := m/5
+      have hmeuclid : m = k*5 + 4 := by
+        omega
+      rw [hmeuclid]
+      grind
+    apply putnam_11 hclosed hsix01 hmsq hmsq1
+
+  unfold isputnam at hclosed
+  obtain ⟨hclosed1, hclosed2⟩ := hclosed
+  specialize hclosed1 m
+  specialize hclosed1 hmsqinS
+  trivial
+
+  have hm23 : m % 5 = 2 ∨ m % 5 = 3 := by
+    grind
+
+  have hmsqsq : (m^2)^2 ≥ 2 := by
+    have hmsq : m^2 ≥ 2 := by
+      have hmsq' : m^2 ≥ m + 2 := by
+        apply nsqincreasing m hm
+      exact Nat.le_of_add_left_le hmsq'
+    have hmsqsq' : (m^2)^2 ≥ m^2 + 2 := by
+      apply nsqincreasing (m^2) hmsq
+    exact Nat.le_of_add_left_le hmsqsq'
+
+  have hmsqsq1 : (m^2)^2 % 5 = 1 := by
+    have hmsq1 : m^2 % 5 = 4 := by
+      let k := m/5
+      by_cases hm2 : m % 5 = 2
+      have hmeuclid : m = k*5 + 2 := by
+        omega
+      rw [hmeuclid]
+      grind
+      have hm3 : m % 5 = 3 := by
+        simp_all only [ge_iff_le, ne_eq, false_or,
+                       Nat.succ_ne_self, not_false_eq_true]
+      have hmeuclid : m = k*5 + 3 := by
+        omega
+      rw [hmeuclid]
+      grind
+
+    let k := m^2/5
+    have hmeuclid : m^2 = k*5 + 4 := by
+      omega
+    rw [hmeuclid]
+    grind
+
+  have hmsqsqinS : (m^2)^2 ∈ S := by
+    apply putnam_11 hclosed hsix01 hmsqsq hmsqsq1
+
+  unfold isputnam at hclosed
+  obtain ⟨hclosed1, hclosed2⟩ := hclosed
+  have hclosed1copy : ∀ (n : ℕ), n ^ 2 ∈ S → n ∈ S := by
+    finiteness
+  specialize hclosed1 (m^2)
+  specialize hclosed1 hmsqsqinS
+  have hmsqinS : m^2 ∈ S := by
+    trivial
+
+  specialize hclosed1copy m
+  specialize hclosed1copy hmsqinS
+  exact hclosed1copy
 
 
 
@@ -614,9 +696,6 @@ theorem putnam_nm {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
                            TODO
 
 -/
-
-/-
-
 theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
     : S_target ⊆ S := by
@@ -630,37 +709,17 @@ theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
     simp_all only [ge_iff_le, ne_eq, not_not]
 
   clear hnot
-  -- XXXXXX
+
   unfold S_target at hminStarget
-  let k := n/5
-  let r := n % 5
-  have heuclid : n = 5*k + r := by
-    exact Eq.symm (Nat.div_add_mod n 5)
-  have hrlt6 : r < 5 := by
-    omega
+  have hminS : m ∈ S := by
+    have hm : m ≥ 2 := by
+      simp_all only [ge_iff_le, ne_eq, Set.mem_setOf_eq]
 
-  by_cases hr0 : r = 0
-  grind
-  by_cases hr1 : r = 1
-  sorry
-  by_cases hr2 : r = 2
-  sorry
-  by_cases hr3 : r = 3
-  sorry
-  by_cases hr4 : r = 4
-  sorry
+    have hm2 : m % 5 ≠ 0 := by
+      simp_all only [ge_iff_le, ne_eq,
+                    Set.mem_setOf_eq, true_and, not_false_eq_true]
 
-  grind
+    apply putnam_nm hclosed hn hm hm2
 
- -/
-
- /-
-
-theorem putnam0 {S : Set ℕ}
-              (hclosed : isputnam S)
-              (htwo : 2 ∈ S) :
-              7 ∈ S := by
-
-  exact nplus5 hclosed htwo
-
- -/
+  unfold S_target
+  finiteness

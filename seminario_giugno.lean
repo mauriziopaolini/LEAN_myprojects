@@ -749,9 +749,6 @@ theorem putnam_nm {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
 /-
   Per concludere come corollario dimostriamo che non ci sono insiemi "isputnam"
   stramente intermedi tra ∅ e S_target
-
-                           TODO
-
 -/
 theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
     (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 ≠ 0)
@@ -780,3 +777,140 @@ theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
 
   unfold S_target
   finiteness
+
+
+/- ================================================================= -/
+/- ================================================================= -/
+/- ================================================================= -/
+
+/- Rubato da XENA project -/
+/- definizione originale:
+
+/-- collatz n means the collatz conjecture is true for n -/
+inductive collatz : ℕ → Prop
+| coll0 : collatz 0
+| coll1 : collatz 1
+| coll_even : ∀ n : ℕ, collatz n → collatz (2 * n)
+| coll_odd : ∀ n : ℕ , collatz (6 * n + 4) → collatz (2 * n + 1)
+
+-/
+
+inductive iscollatz : ℕ → Prop
+| coll0 : iscollatz 0
+| coll1 : iscollatz 1
+| coll_even : ∀ n : ℕ, iscollatz n → iscollatz (2 * n)
+| coll_odd : ∀ n : ℕ , iscollatz (6 * n + 4) → iscollatz (2 * n + 1)
+
+
+def collatz_step (n : ℕ) : ℕ :=
+  (1 - (n%2))*n/2 + (n%2)*(3*n + 1)
+
+def collatz (n : ℕ) (k : ℕ) : ℕ :=
+  Nat.iterate collatz_step k n
+  --collatz_step^[k] n   -- sintassi alternativa
+
+/- Iterate a function.
+def Nat.iterate {α : Sort u} (op : α → α) : ℕ → α → α
+  | 0, a => a
+  | succ k, a => iterate op k (op a)
+ -/
+
+open Nat
+
+def collatz_tr : ℕ → ℕ → ℕ
+  | 0, a => a
+  | succ k, a => collatz_tr k (collatz_step a)
+
+def collatz' (n : ℕ) (k : ℕ) : ℕ :=
+  collatz_tr k n
+
+
+--#eval collatz 9 13
+
+theorem collatz_even_ok (n : ℕ) (heven : n % 2 = 0)
+    : collatz_step n = n/2 := by
+
+  unfold collatz_step
+  simp_all only [tsub_zero, one_mul, zero_mul, add_zero]
+
+
+theorem collatz_odd_ok (n : ℕ) (hodd : n % 2 = 1)
+    : collatz_step n = 3*n + 1 := by
+
+  unfold collatz_step
+
+  simp_all only [tsub_self, zero_mul, Nat.zero_div, one_mul, zero_add]
+
+/- ================================================================= -/
+
+def iscollatz' (n : ℕ) := ∃ C : ℕ, collatz n C = 1
+
+
+theorem collatz_conjecture : ∀ n : ℕ, iscollatz n := by
+  sorry
+
+
+theorem collatz_conjecture_upto10 : ∀ m : ℕ, 0 < m ∧ m ≤ 10 → iscollatz' m := by
+
+  unfold iscollatz'
+  unfold collatz
+  unfold collatz_step
+  intro m
+
+  by_cases hleq10 : 0 < m ∧ m ≤ 10
+  swap
+  tauto
+
+  simp_all
+
+  by_cases h0 : m = 1
+  rw [h0]
+  use 0
+  decide
+
+  by_cases h0 : m = 2
+  rw [h0]
+  use 1
+  decide
+
+  by_cases h0 : m = 4
+  rw [h0]
+  use 2
+  decide
+
+  by_cases h0 : m = 8
+  rw [h0]
+  use 3
+  decide
+
+  by_cases h0 : m = 5
+  rw [h0]
+  use 5
+  decide
+
+  by_cases h0 : m = 10
+  rw [h0]
+  use 6
+  decide
+
+  by_cases h0 : m = 7
+  rw [h0]
+  use 16
+  decide
+
+  by_cases h0 : m = 3
+  rw [h0]
+  use 7
+  decide
+
+  by_cases h0 : m = 6
+  rw [h0]
+  use 8
+  decide
+
+  by_cases h0 : m = 9
+  rw [h0]
+  use 19
+  decide
+
+  omega

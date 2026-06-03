@@ -158,7 +158,7 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
 
 /-
-Putnam 2017 A1:
+Putnam competition 2017 A1:
 
 Let S be the smallest set of positive integers such that
  a) 2 ∈ S,

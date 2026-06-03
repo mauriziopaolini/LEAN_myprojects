@@ -296,8 +296,22 @@ theorem intersection_isputnam {I : Type*} (SS : I → Set ℕ)
 
 
 
+def myset : Set ℕ := insert 1 {2,3}
+example : myset = {1,2,3} := by
+  trivial
+example : myset = {2,3} ∪ {1} := by
+  aesop
+
+
+
+
 
 def S_target : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 ≠ 0)}
+/- added post-seminario -/
+def S_5 : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 = 0)}
+def S_targetplus : Set ℕ := insert 1 S_target
+--{n : ℕ | n ≥ 1 ∧ (n % 5 ≠ 0)}
+def S_5plus : Set ℕ := {n : ℕ | n ≥ 0 ∧ (n % 5 = 0)}
 
 lemma S_target_is_putnam : (isputnam S_target) := by
 
@@ -350,6 +364,128 @@ lemma S_target_is_putnam : (isputnam S_target) := by
 
   grind
 
+/- added post-seminario -/
+
+lemma S_targetplus_is_putnam : (isputnam S_targetplus) := by
+
+  have hS1 : isputnam S_target := by
+    apply S_target_is_putnam
+
+  unfold S_targetplus
+  unfold isputnam
+  unfold isputnam at hS1
+  constructor
+  intro n
+  by_cases h : n^2 ∈ S_target
+
+  have h1 : n ∈ S_target := by
+    simp_all only
+
+  sorry
+
+  sorry
+
+  sorry
+
+lemma S_5_is_putnam : (isputnam S_5) := by
+  unfold S_5
+  unfold isputnam
+  constructor
+  intro n hn
+  have hnsqmod5 : n^2 % 5 = 0 := by
+    simp_all only [ge_iff_le, mem_setOf_eq]
+
+  have hnmod5 : n % 5 = 0 := by
+    by_contra hn'
+    let k := n/5
+    let r := n%5
+    have hr : r ≠ 0 := by
+      positivity
+    have hr' : r < 5 := by
+      omega
+
+    have hrsq : r^2 % 5 ≠ 0 := by
+      by_cases hr1 : r = 1
+      have hrsq1 : r^2 = 1 := by
+        rw [hr1]
+        simp
+
+      rw [hrsq1]
+      decide
+
+      by_cases hr2 : r = 2
+      have hrsq2 : r^2 = 4 := by
+        rw [hr2]
+        simp
+
+      rw [hrsq2]
+      decide
+
+      by_cases hr3 : r = 3
+      have hrsq3 : r^2 = 9 := by
+        rw [hr3]
+        simp
+
+      rw [hrsq3]
+      decide
+
+      by_cases hr4 : r = 4
+      have hrsq4 : r^2 = 16 := by
+        rw [hr4]
+        simp
+
+      rw [hrsq4]
+      decide
+
+      omega
+
+    have hnn : n = k*5 + r := by
+      exact Eq.symm (div_add_mod' n 5)
+
+    have hnsq : n^2 = k*k*5*5 + 2*5*k*r + r^2 := by
+      grind
+
+    grind
+
+  have hnsq2 : n^2 ≥ 2 := by
+    simp_all only [ge_iff_le, mem_setOf_eq, and_true]
+
+  have hn2 : n ≥ 2 := by
+    by_contra hnot
+    have hnle1 : n ≤ 1 := by
+      exact Nat.le_of_not_lt hnot
+    have hnsqle1 : n^2 ≤ 1 := by
+      simp_all only [ge_iff_le, mem_setOf_eq, and_self, not_le, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, Nat.pow_le_one_iff]
+    omega
+
+  show n ≥ 2 ∧ n % 5 = 0
+  constructor
+  exact hn2
+
+  exact hnmod5
+
+  intro n hn
+  have hn2 : n ≥ 2 := by
+    simp_all only [ge_iff_le, mem_setOf_eq]
+  have hn5 : n % 5 = 0 := by
+    simp_all only [ge_iff_le, mem_setOf_eq, true_and]
+
+  show (n+5)^2 ≥ 2 ∧ (n+5)^2 % 5 = 0
+  constructor
+  have hn5' : n+5 ≥ 2 := by
+    norm_num
+  by_contra hnot
+  have hn5le1 : n + 5 ≤ 1 := by
+    grind
+  trivial
+
+  have hn5' : (n+5) % 5 = 0 := by
+    simp_all only [ge_iff_le, mem_setOf_eq, and_self, add_mod_right]
+
+  let k := (n+5)/5
+  have hk : n+5 = k*5 := by omega
+  have hn5sq : (n+5)^2 = 5*5*k*k := by grind
+  grind
 
 -- #check S_target
 
@@ -487,7 +623,12 @@ lemma nsqincreasing (n : ℕ) (hn: n ≥ 2) : n^2 ≥ n + 2 := by
     exact Nat.le_of_ble_eq_true rfl
 
   rw [hnx]
-  grind
+  linarith
+  /- post-seminario:
+  Ale si è accorto che per qualche ragione "grind" può
+  non funzionare... "linarith" pare essere una buona alternativa
+  -/
+  --grind
 
 /- ================================================================= -/
 
@@ -925,16 +1066,16 @@ theorem collatz_odd_ok (n : ℕ) (hodd : n % 2 = 1)
 def iscollatz' (n : ℕ) := ∃ C : ℕ, collatz n C = 1
 
 
-theorem collatz_conjecture : ∀ n : ℕ, iscollatz n := by
-  sorry
+--theorem collatz_conjecture : ∀ n : ℕ, iscollatz n := by
+--  sorry
 
 /- ================================================================= -/
 
 /-
  Esercizio: le due definizioni sono equivalenti?
  -/
-theorem collatz_equiv : ∀ n : ℕ, iscollatz n ↔ iscollatz' n := by
-  sorry
+--theorem collatz_equiv : ∀ n : ℕ, iscollatz n ↔ iscollatz' n := by
+--  sorry
 
 theorem collatz_conjecture_upto10 : ∀ m : ℕ, 0 < m ∧ m ≤ 10 → iscollatz' m := by
 

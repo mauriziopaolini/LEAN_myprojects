@@ -1,4 +1,7 @@
 /-
+  Questo file è disponibile con il nome "seminario_giugno.lean" nel
+  mio progetto github: https://github.com/mauriziopaolini/LEAN_myprojects
+
   WHAT IS LEAN?
   A modern, statically typed programming language and proof assistant.
   It is used for both general-purpose programming and formal
@@ -42,6 +45,11 @@ variable (x : ℝ) (n : ℕ)
   Vogliamo dimostrare che "Non è vero che 'se x al quadrato meno
   tre x + 2 uguale a zero, allora x uguale a 1'"
   Spiegare 'example' vs 'theorem' vs 'lemma'
+
+  tactics cheat-sheets:
+  https://raw.githubusercontent.com/madvorak/lean4-cheatsheet/main/lean-tactics.pdf
+  https://raw.githubusercontent.com/fpvandoorn/LeanCourse24/master/lean-tactics.pdf
+  https://leanprover-community.github.io/img/lean-tactics.pdf
  -/
 
 

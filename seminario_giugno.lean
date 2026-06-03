@@ -296,14 +296,6 @@ theorem intersection_isputnam {I : Type*} (SS : I → Set ℕ)
 
 
 
-def myset : Set ℕ := insert 1 {2,3}
-example : myset = {1,2,3} := by
-  trivial
-example : myset = {2,3} ∪ {1} := by
-  aesop
-
-
-
 
 
 def S_target : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 ≠ 0)}

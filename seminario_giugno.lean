@@ -181,12 +181,67 @@ lemma univ_is_putnam : isputnam (Set.univ : Set ℕ) := by
   norm_num
 
 /-
- NOTA: questo teorema non serve per risolvere il problema, ma mostra
+ NOTA: i due teoremi seguenti non servono per risolvere il problema, ma mostrano
  che viene definita una topologia per cui gli insiemi "isputnam" sono
  i chiusi
 
  Dimostriamo che gli insiemi "isputnam" sono chiusi rispetto
- all'intersezione
+ all'unione finita
+-/
+
+theorem union_isputnam (S T : Set ℕ) (hS : isputnam S) (hT : isputnam T)
+    : isputnam (S ∪ T) := by
+
+  unfold isputnam
+  constructor
+
+  intro n hn
+  have hh : n^2 ∈ S ∨ n^2 ∈ T := by
+    tauto
+  obtain hhS | hhT := hh
+  unfold isputnam at hS
+  obtain ⟨hS1, hS2⟩ := hS
+
+  have hninS : n ∈ S := by
+    simp_all only [Set.mem_union, true_or]
+
+  show n ∈ S ∨ n ∈ T
+  left
+  exact hninS
+
+  unfold isputnam at hT
+  obtain ⟨hT1, hT2⟩ := hT
+
+  right
+  have hninT : n ∈ T := by
+    simp_all only [Set.mem_union]
+
+  exact hninT
+
+  intro n hn
+  have hh : n ∈ S ∨ n ∈ T := by
+    tauto
+
+  obtain hhS | hhT := hh
+  unfold isputnam at hS
+  show (n+5)^2 ∈ S ∨ (n+5)^2 ∈ T
+  left
+
+  have hnsqinS : (n+5)^2 ∈ S := by
+    simp_all only [Set.mem_union, true_or]
+  exact hnsqinS
+
+  show (n+5)^2 ∈ S ∨ (n+5)^2 ∈ T
+  right
+  have hnsqinT : (n+5)^2 ∈ T := by
+    unfold isputnam at hT
+    simp_all only [Set.mem_union]
+
+  exact hnsqinT
+
+/-
+ Dimostriamo che gli insiemi "isputnam" sono chiusi rispetto
+ all'intersezione qualunque
 -/
 
 open Set

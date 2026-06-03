@@ -849,6 +849,13 @@ def iscollatz' (n : ℕ) := ∃ C : ℕ, collatz n C = 1
 theorem collatz_conjecture : ∀ n : ℕ, iscollatz n := by
   sorry
 
+/- ================================================================= -/
+
+/-
+ Esercizio: le due definizioni sono equivalenti?
+ -/
+theorem collatz_equiv : ∀ n : ℕ, iscollatz n ↔ iscollatz' n := by
+  sorry
 
 theorem collatz_conjecture_upto10 : ∀ m : ℕ, 0 < m ∧ m ≤ 10 → iscollatz' m := by
 

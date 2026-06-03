@@ -53,9 +53,8 @@ variable (x : ℝ) (n : ℕ)
  -/
 
 
-example : x^2 - 3*x + 2 = 0 → x = 1 := by
-
-  sorry
+--example : x^2 - 3*x + 2 = 0 → x = 1 := by
+--  sorry
 
 
 
@@ -69,8 +68,15 @@ example : x^2 - 3*x + 2 = 0 → x = 1 := by
 
 
 example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
+  push_neg
+  use 2
+  clear x
+  constructor
+  swap
+  norm_num
 
-  sorry
+  norm_num
+
 
 
 
@@ -98,7 +104,6 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 /-
  Nel prossimo esempio non c'è verso di completare la dimostrazione...
  Perché?
- -/
 
 example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 -- example : ¬ ∀ n, (3 - 3*n + n^2 = 1 → n = 1) := by
@@ -112,6 +117,7 @@ example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
   -- grind
   sorry
 
+ -/
 
 
 
@@ -134,13 +140,12 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 /- trabocchetti... -/
 
 --#eval 2^2 - 3*2 + 2
-
 --#check 2^2 - 3*2
 --#eval 2^2 - 3*2
 --#eval (2:ℤ)^2 - (3:ℤ)*2
 --#eval (2:ℝ) - (3:ℝ)
 
---open Nat
+open Nat
 --#eval pred 0
 
 
@@ -318,7 +323,7 @@ lemma S_target_is_putnam : (isputnam S_target) := by
     have hnsqndiv5 : ¬ (5 ∣ n^2) := by
       grind
     contrapose hnsqndiv5
-    have hp : Prime 5 := by
+    have hp : _root_.Prime 5 := by
       decide
     refine Dvd.dvd.pow hnsqndiv5 ?_
     norm_num
@@ -337,7 +342,7 @@ lemma S_target_is_putnam : (isputnam S_target) := by
       exact Nat.dvd_of_mod_eq_zero hmsqmultiple
 
     have hmeq5 : 5 ∣ m := by
-      have hp : Prime 5 := by
+      have hp : _root_.Prime 5 := by
         decide
       exact Prime.dvd_of_dvd_pow hp hmsqk5
 

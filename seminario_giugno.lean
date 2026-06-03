@@ -53,6 +53,13 @@ example : x^2 - 3*x + 2 = 0 → x = 1 := by
 
 
 
+
+
+
+
+
+
+
 example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
 
   sorry
@@ -85,7 +92,8 @@ example : ¬ ∀ x : ℝ, (x^2 - 3*x + 2 = 0 → x = 1) := by
  Perché?
  -/
 
-example : ¬ ∀ n, (3 - 3*n + n^2 = 1 → n = 1) := by
+example : ¬ ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
+-- example : ¬ ∀ n, (3 - 3*n + n^2 = 1 → n = 1) := by
 
   push_neg
   use 2
@@ -95,6 +103,8 @@ example : ¬ ∀ n, (3 - 3*n + n^2 = 1 → n = 1) := by
 
   -- grind
   sorry
+
+
 
 
 
@@ -113,8 +123,6 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 
 
 
-
-
 /- trabocchetti... -/
 
 --#eval 2^2 - 3*2 + 2
@@ -124,7 +132,8 @@ example : ∀ n, (n^2 - 3*n + 2 = 0 → n = 1) := by
 --#eval (2:ℤ)^2 - (3:ℤ)*2
 --#eval (2:ℝ) - (3:ℝ)
 
-
+--open Nat
+--#eval pred 0
 
 
 
@@ -149,6 +158,8 @@ Let S be the smallest set of positive integers such that
  c) n ∈ S → (n+5)^2 ∈ S.
 Which positive integers are not in S?
  -/
+
+
 
 def isputnam (S : Set ℕ) : Prop :=
   (∀ n : ℕ, n^2 ∈ S → n ∈ S) ∧ (∀ n ∈ S, (n+5)^2 ∈ S)

@@ -295,11 +295,33 @@ theorem intersection_isputnam {I : Type*} (SS : I → Set ℕ)
   simp_all only [mem_iInter, implies_true]
 
 
+theorem intersection_ST (S T : Set ℕ)
+    (hS : isputnam S) (hT : isputnam T)
+    : isputnam (S ∩ T) := by
+
+  let I := Fin 2
+  let SS : I → Set ℕ := (λ n => if (n = 0) then S else T)
+
+  have hSS : ∀ i : I, isputnam (SS i) := by
+    exact fun i => iteInduction (fun a => hS) fun a => hT
+
+  have h : isputnam (⋂ i, SS i) := by
+    apply intersection_isputnam SS hSS
+
+  have hhi : (⋂ i, SS i) = S ∩ T := by
+    aesop
+
+  rw [← hhi]
+  exact h
 
 
 
 def S_target : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 ≠ 0)}
-/- added post-seminario -/
+/-
+ -     === added post-seminario ===
+ - definiamo altri 3 "chiusi" con cui costruire per unione
+ - tutti i chiusi della topologia
+ -/
 def S_5 : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 = 0)}
 def S_targetplus : Set ℕ := insert 1 S_target
 def S_5plus : Set ℕ := insert 0 S_5
@@ -565,6 +587,7 @@ lemma S_5plus_is_putnam : (isputnam S_5plus) := by
 
   simp_all only [mem_insert_iff, or_true]
 
+/- fine parte aggiunta post-seminario -/
 
 
 /- ================================================== -/
@@ -843,7 +866,7 @@ lemma putnam_11 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
 /- ================================================================= -/
 
 /-
-  Dimostriamo che se S contiene un numero non congruo a 0, allora per ogni m ≥ 2
+  Dimostriamo che se S contiene un numero non congruo a 0, allora ∀ m ≥ 2
   congruo a 1, m ∈ S
 -/
 lemma putnam_n1 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
@@ -1078,6 +1101,224 @@ theorem putnam {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
 
 /- ================================================================= -/
 /- ================================================================= -/
+/- ================================================================= -/
+/- post-seminario: aggiungiamo alcuni risultati per identificare
+   TUTTI i chiusi della topologia, ovvero TUTTI gli insiemi "isputnam"
+ -/
+
+/-
+ ====> Altro teorema ricorsivo <====
+ Dimostriamo che se n ∈ S, congruo a 0 (mod 5) e m è anch'esso congruo a 0 (mod 5)
+ con 2 ≤ m < n, allora anche m ∈ S
+ -/
+
+lemma putnam00pre {S : Set ℕ} {n delta : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 0)
+    (hdelta : delta > 0) (hdelta0 : delta ≤ n-2) (hdelta1 : 5 ∣ delta)
+    : n-delta ∈ S := by
+
+  let m := n - delta
+  let k := (n-m)/5
+  have hm0 : m ≥ 2 := by
+    grind
+  have hm1 : n = m + k*5 := by
+    omega
+
+  let msq := m^2
+
+  have hmsq : msq % 5 = 0 := by
+
+    let k := m / 5
+    have hm3 : m = k*5 := by
+      omega
+
+    show m^2 % 5 = 0
+    rw [hm3]
+    grind
+
+  have hmsqincr : m^2 ≥ m + 2 := by
+    exact nsqincreasing m hm0
+
+  have hmsq0 : m^2 ≥ 2 := by
+    grind
+
+  have hmsqinS : msq ∈ S := by
+    obtain ⟨hn1, hn2, hn3⟩ := hn
+    by_cases hsimple : msq ≥ n
+    let k := (msq-n)/5
+    have hmsq1 : msq = n + k*5 := by
+      omega
+
+    have hhh : n + k*5 ∈ S := by
+      exact nplusk5 hclosed hn1 k
+
+    rw [hmsq1]
+    trivial
+
+    have hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 0 := by
+      trivial
+
+    have hsqincreasing : msq > m := by
+      grind
+
+    have hdecr : n - msq < n - m := by
+      grind
+
+    have hngtm : n > m := by
+      grind
+
+    let newdelta := n - msq
+    have hnewdelta : newdelta > 0 := by
+      exact tsub_pos_iff_not_le.mpr hsimple
+    have hnewdelta0 : newdelta ≤ n - 2 := by
+      exact Nat.sub_le_sub_left hmsq0 n
+    have hnewdelta1 : 5 ∣ newdelta := by
+      omega
+
+    have hhhh : msq = n - newdelta := by
+      omega
+    rw [hhhh]
+
+    /- l'ipotesi che segue non sembra essere necessaria
+       ma se proviamo a rimuoverla...
+    -/
+    have hdeltadecr : newdelta < delta := by
+      omega
+    --clear hdeltadecr
+    apply putnam00pre hclosed hn hnewdelta hnewdelta0 hnewdelta1
+
+  unfold isputnam at hclosed
+  tauto
+
+/-
+  Dimostriamo che se S contiene un numero congruo a 0, allora
+  ∀ m ≥ 2 congruo a 0
+  S contiene m
+-/
+lemma putnam_00 {S : Set ℕ} {n m : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 0)
+    (hm : m ≥ 2) (hm2 : m % 5 = 0) : m ∈ S := by
+
+  have hn1 : n ∈ S := by
+    simp_all only [ge_iff_le]
+  have hn2 : n ≥ 2 := by
+    simp_all only [ge_iff_le, true_and]
+  have hn3 : n % 5 = 0 := by
+    simp_all only [ge_iff_le, true_and]
+  --obtain ⟨hn1, hn2, hn3⟩ := hn
+  by_cases htriv : m ≥ n
+  let k := (m-n)/5
+  have hm1 : m = n + k*5 := by
+    omega
+
+  have hhh : n + k*5 ∈ S := by
+    exact nplusk5 hclosed hn1 k
+
+  rw [hm1]
+  trivial
+
+  let delta := n-m
+
+  have hdelta0 : delta ≤ n - 2 := by
+    grind
+
+  have hdelta1 : 5 ∣ delta := by
+    omega
+
+  have hhhh : m = n - delta := by
+    omega
+  rw [hhhh]
+
+  have hdelta : delta > 0 := by
+    simp_all only [ge_iff_le, and_self, not_le, tsub_lt_self_iff, gt_iff_lt]
+  apply putnam00pre hclosed hn hdelta hdelta0 hdelta1
+
+
+
+theorem putnam0 {S : Set ℕ} {n : ℕ} (hclosed : isputnam S)
+    (hn : n ∈ S ∧ n ≥ 2 ∧ n % 5 = 0)
+    : S_5 ⊆ S := by
+
+  unfold isputnam at hclosed
+  intro m
+  by_cases hnot : m ∉ S_5
+  tauto
+
+  have hminStarget : m ∈ S_5 := by
+    simp_all only [ge_iff_le, not_not]
+
+  clear hnot
+
+  unfold S_5 at hminStarget
+  have hminS : m ∈ S := by
+    have hm : m ≥ 2 := by
+      simp_all only [ge_iff_le, Set.mem_setOf_eq]
+
+    have hm2 : m % 5 = 0 := by
+      simp_all only [ge_iff_le, Set.mem_setOf_eq, true_and]
+
+/-
+ ci serve qui un teorema analogo a putnam_11
+ per i numeri congrui a 0
+ e quindi ci servirà anche un putnam_00pre ricorsivo
+ -/
+    apply putnam_00 hclosed hn hm hm2
+
+  unfold S_5
+  finiteness
+
+
+theorem putnam_one_gives_Stargetplus {S : Set ℕ} (hclosed : isputnam S)
+    (h1inS : 1 ∈ S) : S_targetplus ⊆ S := by
+
+  have hSt : isputnam S_target := by
+    apply S_target_is_putnam
+
+  have hintersection : isputnam (S ∩ S_target) := by
+    apply intersection_ST S S_target hclosed hSt
+
+  have hsix : 6 ∈ S := by
+    apply nplus5 hclosed h1inS
+
+  have hhh : S_target ⊆ S := by
+
+    have hsix' : 6 ∈ S ∧ 6 ≥ 2 ∧ 6 % 5 ≠ 0 := by
+      norm_num
+      exact hsix
+
+    apply putnam hclosed hsix'
+
+  unfold S_targetplus
+  exact insert_subset h1inS hhh
+
+
+theorem putnam_zero_gives_S5plus {S : Set ℕ} (hclosed : isputnam S)
+    (h0inS : 0 ∈ S) : S_5plus ⊆ S := by
+
+  have hSt : isputnam S_5 := by
+    apply S_5_is_putnam
+
+  have hintersection : isputnam (S ∩ S_5) := by
+    apply intersection_ST S S_5 hclosed hSt
+
+  have hfive : 5 ∈ S := by
+    apply nplus5 hclosed h0inS
+
+  have hhh : S_5 ⊆ S := by
+
+    have hfive' : 5 ∈ S ∧ 5 ≥ 2 ∧ 5 % 5 = 0 := by
+      norm_num
+      exact hfive
+
+    apply putnam0 hclosed hfive'
+
+  unfold S_5plus
+  exact insert_subset h0inS hhh
+
+
+
+/- ================================================================= -/
+/- ========================= COLLATZ =============================== -/
 /- ================================================================= -/
 
 /- Rubato da XENA project -/

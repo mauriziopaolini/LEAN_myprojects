@@ -302,8 +302,7 @@ def S_target : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 ≠ 0)}
 /- added post-seminario -/
 def S_5 : Set ℕ := {n : ℕ | n ≥ 2 ∧ (n % 5 = 0)}
 def S_targetplus : Set ℕ := insert 1 S_target
---{n : ℕ | n ≥ 1 ∧ (n % 5 ≠ 0)}
-def S_5plus : Set ℕ := {n : ℕ | n ≥ 0 ∧ (n % 5 = 0)}
+def S_5plus : Set ℕ := insert 0 S_5
 
 lemma S_target_is_putnam : (isputnam S_target) := by
 
@@ -367,17 +366,49 @@ lemma S_targetplus_is_putnam : (isputnam S_targetplus) := by
   unfold isputnam
   unfold isputnam at hS1
   constructor
-  intro n
+  intro n hn
   by_cases h : n^2 ∈ S_target
 
   have h1 : n ∈ S_target := by
     simp_all only
 
-  sorry
+  have h1plus : n ∈ insert 1 S_target := by
+    simp_all only [mem_insert_iff, or_true]
 
-  sorry
+  tauto
 
-  sorry
+  have hnsqeq1 : n^2 = 1 := by
+    simp_all only [mem_insert_iff, pow_eq_one_iff,
+                  OfNat.ofNat_ne_zero, or_false, one_pow]
+
+  have hneq1 : n = 1 := by
+    simp_all only [mem_insert_iff, true_or,
+                pow_eq_one_iff, OfNat.ofNat_ne_zero, or_false]
+
+  grind
+
+  intro n hn
+  have hnS : (n+5)^2 ∈ S_target := by
+
+    by_cases h : n ∈ S_target
+    have hStp : isputnam S_target := by
+      apply S_target_is_putnam
+
+    unfold isputnam at hStp
+
+    obtain ⟨hStp1, hStp2⟩ := hStp
+    specialize hStp2 n
+    tauto
+
+    have h' : n = 1 := by
+      simp_all only [mem_insert_iff, or_false]
+
+    simp_all
+    unfold S_target
+    decide
+
+  simp_all only [mem_insert_iff, pow_eq_one_iff, reduceEqDiff,
+              OfNat.ofNat_ne_zero, or_self, or_true]
 
 lemma S_5_is_putnam : (isputnam S_5) := by
   unfold S_5
@@ -479,7 +510,61 @@ lemma S_5_is_putnam : (isputnam S_5) := by
   have hn5sq : (n+5)^2 = 5*5*k*k := by grind
   grind
 
--- #check S_target
+
+
+lemma S_5plus_is_putnam : (isputnam S_5plus) := by
+
+  have hS1 : isputnam S_5 := by
+    apply S_5_is_putnam
+
+  unfold S_5plus
+  unfold isputnam
+  unfold isputnam at hS1
+  constructor
+  intro n hn
+  by_cases h : n^2 ∈ S_5
+
+  have h1 : n ∈ S_5 := by
+
+    simp_all only
+
+  have h1plus : n ∈ insert 0 S_5 := by
+    simp_all only [mem_insert_iff, or_true]
+
+
+  tauto
+
+  have hnsqeq1 : n^2 = 0 := by
+    simp_all only [mem_insert_iff, or_false]
+
+  have hneq1 : n = 0 := by
+    simp_all only [mem_insert_iff, true_or, Nat.pow_eq_zero,
+          ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, and_true]
+
+  grind
+
+  intro n hn
+  have hnS : (n+5)^2 ∈ S_5 := by
+
+    by_cases h : n ∈ S_5
+    have hStp : isputnam S_5 := by
+      apply S_5_is_putnam
+
+    unfold isputnam at hStp
+
+    obtain ⟨hStp1, hStp2⟩ := hStp
+    specialize hStp2 n
+    tauto
+
+    have h' : n = 0 := by
+      simp_all only [mem_insert_iff, or_false]
+
+    simp_all
+    unfold S_5
+    decide
+
+  simp_all only [mem_insert_iff, or_true]
+
 
 
 /- ================================================== -/

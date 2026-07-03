@@ -5,17 +5,57 @@ import Mathlib
 
 variable (x : ℝ) (i : ℕ)
 
-
-theorem gauss (n : ℕ) (hnpos : n > 0): (∑ i < n, i) = n*(n-1)/2 := by
+theorem gaussind (n : ℕ) : (∑ i < n, i) = n*(n-1)/2 := by
 
   by_cases hnzero : n = 0
-  linarith
+  rw [hnzero]
+  have hempty : Finset.Iio 0 = ∅ := by
+    norm_num
 
-  by_cases hnone : n = 1
+  have hsumempty : ∑ i ∈ ∅, i = 0 := by
+    norm_num
+
+  rw [hempty, hsumempty]
+
+  set m := n - 1
+
+  have hn : n = m + 1 := by grind
+
+  rw [hn]
+  -- clear hn
+  clear hnzero
+
+  induction hm:m generalizing m
+
+  case neg.zero =>
+
+    simp_all
+
+  case neg.succ h1 h2 =>
+    rw [hn] at h2
+    simp_all
+    sorry
+
+
+
+
+theorem gaussrec (n : ℕ) : (∑ i < n, i) = n*(n-1)/2 := by
+
+  by_cases hnzero : n = 0
+  rw [hnzero]
+  have hempty : Finset.Iio 0 = ∅ := by
+    norm_num
+
+  have hsumempty : ∑ i ∈ ∅, i = 0 := by
+    norm_num
+
+  rw [hempty, hsumempty]
+
+  by_cases hnisone : n = 1
   have hf : Finset.Iio n = {0} := by
     grind
 
-  rw [hf, hnone]
+  rw [hf, hnisone]
   have hs : ∑ i ∈ {0}, i = 0 := by
     norm_num
 
@@ -30,7 +70,7 @@ theorem gauss (n : ℕ) (hnpos : n > 0): (∑ i < n, i) = n*(n-1)/2 := by
     omega
 
   have hprev : (∑ i < nm1, i) = nm1*(nm1-1)/2 := by
-    apply gauss nm1 hnm1pos
+    apply gaussrec nm1
 
   have hadd : Finset.Iio n = {nm1} ∪ Finset.Iio nm1 := by
     grind
@@ -42,7 +82,7 @@ theorem gauss (n : ℕ) (hnpos : n > 0): (∑ i < n, i) = n*(n-1)/2 := by
   rw [hprev] at hhh
   rw [hhh]
   have hn : n = nm1 + 1 := by
-    exact (Nat.sub_eq_iff_eq_add hnpos).mp rfl
+    exact Eq.symm (Nat.succ_pred_eq_of_ne_zero hnzero)
 
   rw [hn]
   have h1 : (nm1+1)*nm1 = nm1^2 + nm1 := by
@@ -60,55 +100,8 @@ theorem gauss (n : ℕ) (hnpos : n > 0): (∑ i < n, i) = n*(n-1)/2 := by
   grind
 
 
+variable (p q : Prop)
 
-lemma lemgauss (n : ℕ) : (∑ i < n, (i+1)) = n*(n+1)/2 := by
+example (hp : p ∧ (¬ p)) : 0 = 1 := by
 
-  by_cases hzero : n = 0
-  rw [hzero]
-  have hempty : Finset.Iio 0 = ∅ := by
-    norm_num
-
-  rw [hempty]
-
-  grind
-
-  have hngt0 : 0 < n := by
-    positivity
-
-  set nm1 := n - 1
-  have hmp1 : n = nm1 + 1 := by
-    exact (Nat.sub_eq_iff_eq_add hngt0).mp rfl
-
-  have hprev : (∑ i < nm1, (i+1)) = nm1*(nm1+1)/2 := by
-
-
-    apply lemgauss nm1
-
-  have hh : (∑ i < n, (i+1)) = (∑ i < nm1, (i+1)) + n := by
-    have hfinset : Finset.Iio n = {nm1} ∪ Finset.Iio nm1 := by
-      grind
-
-    rw [hfinset]
-    have hnotin : ¬ nm1 ∈ Finset.Iio nm1 := by
-      norm_num
-
-    have hhh : ∑ i ∈ Finset.Iio n, (i+1) =
-            (∑ i ∈ {nm1}, (i+1)) +
-            (∑ i ∈ Finset.Iio nm1, (i+1)) := by
-      grind
-
-    rw [←hfinset]
-    rw [hhh]
-
-    have hfirst : ∑ i ∈ {nm1}, (i+1) = n := by
-      simp_all only [Nat.add_eq_zero_iff, one_ne_zero, and_false, not_false_eq_true, lt_add_iff_pos_left,
-        Order.lt_add_one_iff, zero_le, Finset.singleton_union, Finset.Iio_insert, Finset.mem_Iio, lt_self_iff_false,
-        Finset.sum_singleton]
-
-    rw [hfirst]
-    ring
-
-  rw [hh]
-  rw [hprev]
-  rw [hmp1]
-  grind
+  tauto
